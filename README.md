@@ -4,6 +4,8 @@ A modern, lightweight, reactive web application for managing remote games of [Fu
 
 The game runs entirely in your browser. There is no server architecture, and internet access is not required once you've downloaded the files.
 
+**NOTE:** The page is 100% designed for mouse and keyboard on a big screen. I welcome pull requests related to touch controls and accessibility, but a Full Thrust game really is not ideal for small screens.
+
 ## How it Works
 
 ## Support

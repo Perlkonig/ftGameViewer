@@ -276,6 +276,7 @@
             <use href="#yRuler" x="0" y="0" height="{rulerWidth}" width="{maxY}" transform="rotate(90) translate({rulerWidth + rulerGap}, -{(rulerWidth * 2) + (rulerGap * 2) + maxX})"/>
 
             <!-- And here's the map -->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <svg bind:this="{innerSvg}" viewBox="{$currX} {$currY} {$currWidth} {$currHeight}" x="{rulerWidth + rulerGap}" y="{rulerWidth + rulerGap}" width="{maxX}" height="{maxY}" on:wheel="{handleWheel}" on:mousedown="{dragStart}" on:mouseup="{dragEnd}" on:mouseleave="{dragEnd}" on:mousemove="{dragMouse}" on:click="{handleLeftClick}" on:contextmenu={handleRightClick}>
                 <rect id="_background" x="0" y="0" width="{maxX}" height="{maxY}" fill="black" />
             {#if $beacon !== undefined}

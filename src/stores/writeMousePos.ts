@@ -6,4 +6,4 @@ export interface IMousePos {
     id?: string;
 }
 
-export const mousePos = writable({} as IMousePos);
+export const mousePos = writable(undefined as IMousePos);
