@@ -1,10 +1,62 @@
 {
     "$schema": "http://json-schema.org/schema#",
     "$id": "https://www.abstractplay.com/schemas/fullthrust/game/commands/1-0-0.json#",
-    "title": "Full Thrust Game Commands",
+    "title": "Full Thrust Game Command",
     "description": "Definitions of possible commands that change game state",
     "type": "object",
     "oneOf": [
+        {
+            "description": "Places a new, pristine ship on the board. If the scenario calls for a less-than-pristine state, then issue whatever commands are necessary to bring the ship to that state. Do not use this for uncloaking a ship! Just issue a `moveShip` order with visible `position` coordinates.",
+            "properties": {
+                "name": {
+                    "enum": ["placeShip"]
+                },
+                "id": {
+                    "description": "The uuid of the ship.",
+                    "type": "string"
+                },
+                "object": {
+                    "description": "The content of the ship, as defined by the ftLibShip schema.",
+                    "$ref": "../../node_modules/ftlibship/dist/schemas/ship.json"
+                },
+                "svg": {
+                    "description": "The SVG code for this ship. It must be a <symbol> tag with a `viewBox` attribute. The image must be oriented such that the front of the ship is at the top of the image. Anything with a fill colour of '#030303' will be replaced by the assigned player's colour.",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "The name of the owning player. The corresponding player object must already be defined.",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Either valid x,y coordinates or `null` if the object is cloaked or otherwise invisible",
+                    "oneOf": [
+                        {
+                            "$ref": "objects.json#/$defs/position"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "course": {
+                    "description": "Expressed as degrees. If given, vector movement is assumed for this ship.",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "speed": {
+                    "description": "Current speed",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                }
+            },
+            "required": ["name", "id", "object", "svg", "owner", "position", "facing", "speed"]
+        },
         {
             "description": "A movement command that updates a ship object directly. You only need provide the fields that have actually changed. Values are absolute.",
             "properties": {
@@ -365,6 +417,23 @@
             },
             "required": ["name", "uuid"],
             "additionalProperties": false
+        },
+        {
+            "description": "Awards victory points to a player",
+            "properties": {
+                "name": {
+                    "enum": ["awardVP"]
+                },
+                "player": {
+                    "description": "The uuid of the player",
+                    "type": "string"
+                },
+                "vp": {
+                    "description": "The amount of VP to award the player. Can be negative. Is simply added to existing total.",
+                    "type": "integer"
+                }
+            },
+            "required": ["name", "player", "vp"]
         },
         {
             "description": "A generic command used just to insert things into the combat log. These commands have no effect on the actual game visuals.",

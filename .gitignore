@@ -13,7 +13,7 @@ dist-ssr
 *.local
 bin/
 src/schemas/*.d.ts
-scratch.svg
+/scratch.*
 
 # Editor directories and files
 .vscode/*

@@ -24,6 +24,10 @@
                     "description": "The content of the ship, as defined by the ftLibShip schema.",
                     "$ref": "../../node_modules/ftlibship/dist/schemas/ship.json"
                 },
+                "svg": {
+                    "description": "The SVG code for this ship. It must be a <symbol> tag with a `viewBox` attribute. The image must be oriented such that the front of the ship is at the top of the image. Anything with a fill colour of '#030303' will be replaced by the assigned player's colour.",
+                    "type": "string"
+                },
                 "position": {
                     "description": "Either valid x,y coordinates or `null` if the object is cloaked or otherwise invisible",
                     "oneOf": [
@@ -130,7 +134,7 @@
                     }
                 }
             },
-            "required": ["objType", "id", "object", "owner", "position", "facing", "speed"]
+            "required": ["objType", "id", "object", "svg", "owner", "position", "facing", "speed"]
         },
         {
             "type": "object",

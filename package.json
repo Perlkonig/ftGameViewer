@@ -1,12 +1,14 @@
 {
   "name": "ftgameviewer",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0-beta",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean && npm run schemas",
+    "postbuild": "shx cp -r src/schemas dist && rimraf -g dist/schemas/*.d.ts",
+    "dev": "set NODE_ENV=development && vite",
+    "build": "set NODE_ENV=production && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "schemas": "json2ts -i src/schemas/position.json -o src/schemas/position.d.ts --cwd ../../../src/schemas && json2ts -i src/schemas/commands.json -o src/schemas/commands.d.ts --cwd ../../../src/schemas"
   },
@@ -29,9 +31,11 @@
     "vite": "^4.3.5"
   },
   "dependencies": {
+    "@zerodevx/svelte-toast": "^0.9.3",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "crypto-js": "^4.1.1",
+    "fast-xml-parser": "^4.2.2",
     "ftlibship": "github:Perlkonig/ftLibShip#v2.2.0",
     "json-stringify-deterministic": "^1.0.8",
     "nanoid": "^4.0.2"

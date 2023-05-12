@@ -5,6 +5,7 @@
     import { sineOut } from 'svelte/easing';
     import { mousePos } from "@/stores/writeMousePos";
     import { beacon } from '@/stores/writeBeacon';
+    import { currentState } from '@/stores/derivedState';
 
     let pixelsPerMU = 100;
     let maxX = 72 * pixelsPerMU;
@@ -34,6 +35,7 @@
         currY.set(0);
         currWidth.set(maxX);
         currHeight.set(maxY);
+        console.log($currentState);
     });
 
     const handleWheel = (e: WheelEvent) => {
