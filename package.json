@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "schemas": "json2ts -i src/schemas/position.json -o src/schemas/position.d.ts --cwd ../../../src/schemas && json2ts -i src/schemas/commands.json -o src/schemas/commands.d.ts --cwd ../../../src/schemas"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.2.0",
@@ -31,6 +32,7 @@
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "crypto-js": "^4.1.1",
+    "ftlibship": "github:Perlkonig/ftLibShip#v2.2.0",
     "json-stringify-deterministic": "^1.0.8",
     "nanoid": "^4.0.2"
   }

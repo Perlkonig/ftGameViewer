@@ -1,0 +1,298 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "https://www.abstractplay.com/schemas/fullthrust/game/objects/1-0-0.json#",
+    "title": "Full Thrust Game Objects",
+    "description": "Definitions of possible on-screen game objects",
+    "type": "object",
+    "oneOf": [
+        {
+            "description": "Describes all ship objects",
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["ship"]
+                },
+                "id": {
+                    "description": "Every object requires a universally unique ID.",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "The name of the owning player. The corresponding player object must already be defined.",
+                    "type": "string"
+                },
+                "object": {
+                    "description": "The content of the ship, as defined by the ftLibShip schema.",
+                    "$ref": "../../node_modules/ftlibship/dist/schemas/ship.json"
+                },
+                "position": {
+                    "description": "Either valid x,y coordinates or `null` if the object is cloaked or otherwise invisible",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/position"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "course": {
+                    "description": "Expressed as degrees. If given, vector movement is assumed for this ship.",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "speed": {
+                    "description": "Current speed",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "vectors": {
+                    "description": "A list of movement vectors, usually rendered by drawing lines on the map. The first entry is the most recent and should be rendered most prominently. Each vector is itself an array of one or more points in the movement (showing course changes and the like).",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/position"
+                        },
+                        "minItems": 2
+                    }
+                },
+                "systems": {
+                    "description": "Lists any damaged/repaired systems. A system not listed here is considered pristine.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The uid of the system",
+                                "type": "string"
+                            },
+                            "state": {
+                                "description": "Typical interpretation is this: damaged systems can be repaired, destroyed systems can't be repaired, and repaired systems cannot be damaged, only destroyed.",
+                                "enum": ["damaged", "repaired", "destroyed"]
+                            }
+                        },
+                        "required": ["id", "state"]
+                    }
+                },
+                "coreState": {
+                    "description": "Core systems are not a normal system. They must be recorded separately.",
+                    "type": "object",
+                    "properties": {
+                        "powerless": {
+                            "description": "If this propery exists, then the power core has been damaged. It's a simple boolean. It's either damaged or not.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "lifeless": {
+                            "description": "Life support will fail once the given number of turns passes.",
+                            "type": "integer"
+                        },
+                        "uncontrolled": {
+                            "description": "No control of the ship for the given number of turns.",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "dmgHull": {
+                    "description": "Records how much total hull damage has been done",
+                    "type": "integer"
+                },
+                "dmgArmour": {
+                    "description": "Records how much damage has been done to each row of armour. The first element is the inner-most armour layer.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "standard": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 0
+                            },
+                            "regenerative": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 0
+                            }
+                        }
+                    }
+                },
+                "ammo": {
+                    "description": "Used to track ammo usage throughout the game (ordnance). Every time ammunition is consumed, insert the system id into this array. Each occurrence will reduce 1 from the SSD. For whole systems (like rocket pods), just mark the system as 'destroyed.'",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["objType", "id", "object", "owner", "position", "facing", "speed"]
+        },
+        {
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["fighters"]
+                },
+                "id": {
+                    "description": "Every object must have a unique ID.",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "The id of the owning player. The player must be defined.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "A simple string definition of the type of fighter squadron this is (e.g., heavy, fast, etc.). The system doesn't enforce any rules. This is simply for the information of the players.",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Either a 'position' if launched, or a hangar id if docked.",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/hangar"
+                        },
+                        {
+                            "$ref": "#/$defs/position"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "vectors": {
+                    "description": "A list of movement vectors, usually rendered by drawing lines on the map. The first entry is the most recent and should be rendered most prominently. Each vector is itself an array of one or more points in the movement (showing course changes and the like).",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/position"
+                        },
+                        "minItems": 2
+                    }
+                },
+                "number": {
+                    "description": "The number of surviving fighters in the squadron",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "endurance": {
+                    "description": "The squad's endurance, which is reset when recovered.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "skill": {
+                    "description": "Only needed if you are playing with ace/turkey rules",
+                    "enum": ["standard", "ace", "turkey"],
+                    "default": "standard"
+                }
+            },
+            "required": ["objType", "id", "owner", "type", "number", "endurance", "skill"]
+        },
+        {
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["ordnance"]
+                },
+                "id": {
+                    "description": "Every object needs a universally unique identifier",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "If provided, the device will be marked as owned by that player colour and will theoretically not target friendly ships",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "These are the built-in ordnance types, with an option for custom types",
+                    "enum": ["missile", "amt", "salvo", "salvoER", "salvoMS", "plasmaBolt", "mine", "rocket", "_other"]
+                },
+                "silhouette": {
+                    "description": "If `type` is `_other`, then you can provide an SVG silhouette here, otherwise a generic marker will be used. The SVG must be a `<symbol>` tag with a `viewBox` attribute and an `id` attribute of the id provided above.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/$defs/position"
+                },
+                "range": {
+                    "description": "If given, hints to the renderer what to display if the object is clicked. Usually used to show a homing or explosion range. Expressed in MUs.",
+                    "type": "number"
+                }
+            },
+            "required": ["objType", "id", "type", "position"]
+        },
+        {
+            "description": "Used to describe any other movable or destructible element on the board not owned by a player (e.g., asteroids).",
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["other"]
+                },
+                "id": {
+                    "description": "Every object needs a universally unique identifier",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "There are built-in types, but custom ones are permitted as well.",
+                    "enum": ["asteroid", "debris", "_other"]
+                },
+                "silhouette": {
+                    "description": "If `type` is `_other`, then you can provide an SVG silhouette here, otherwise a generic marker will be used. The SVG must be a `<symbol>` tag with a `viewBox` attribute and an `id` attribute of the id provided above.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/$defs/position"
+                },
+                "course": {
+                    "description": "These objects can be made to move in an arbitrary direction. Given as degrees",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "speed": {
+                    "description": "Speed of movement in MUs/turn",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": ["objType", "id", "type", "position"]
+        }
+    ],
+    "$defs": {
+        "hangar": {
+            "type": "object",
+            "properties": {
+                "ship": {
+                    "description": "The uuid of the ship the squadron is housed in.",
+                    "type": "string"
+                },
+                "hangar": {
+                    "description": "The uid of the hangar on that ship where the squadron is housed.",
+                    "type": "string"
+                }
+            },
+            "required": ["ship", "hangar"]
+        },
+        "position": {
+            "description": "Generic x,y coordinate object. All units are in MUs relative to 0,0.",
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y"],
+            "additionalProperties": false
+        }
+    }
+}

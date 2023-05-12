@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 bin/
+src/schemas/*.d.ts
 scratch.svg
 
 # Editor directories and files

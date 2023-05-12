@@ -1,0 +1,80 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "https://www.abstractplay.com/schemas/fullthrust/game/position/1-0-0.json#",
+    "title": "Full Thrust Game Position",
+    "description": "Description of a discrete game state that the viewer renders. This is typically the accumulation of a list of commands.",
+    "type": "object",
+    "properties": {
+        "players": {
+            "description": "List of participating players. Must be defined before one can assign objects to them.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "A UUID for the player, typically a name of some sort.",
+                        "type": "string"
+                    },
+                    "colour": {
+                        "description": "A valid hexadecimal colour string that will be used to identify objects belonging to different players.",
+                        "type": "string",
+                        "minLength": 7,
+                        "maxLength": 7,
+                        "pattern": "/^#[A-Fa-f0-9]{6}$/"
+                    },
+                    "vp": {
+                        "description": "Current victory point total",
+                        "type": "number",
+                        "default": 0
+                    }
+                },
+                "required": ["id", "colour"]
+            }
+        },
+        "mapFeatures": {
+            "description": "Map features are background features like planets or other phenomena. They do not move and cannot be interacted with.",
+            "type": "array",
+            "minItems": 0,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for this feature. Must match the `id` attribute in the associated SVG symbol",
+                        "type": "string"
+                    },
+                    "symbol": {
+                        "description": "All features must be expressed as an svg `<symbol>` tag with both a `viewBox` attribute and an `id` attribute that matches the `id` given above.",
+                        "type": "string"
+                    },
+                    "x": {
+                        "description": "Given in MUs.",
+                        "type": "number"
+                    },
+                    "y": {
+                        "description": "Given in MUs.",
+                        "type": "number"
+                    },
+                    "width": {
+                        "description": "Given in MUs.",
+                        "type": "number"
+                    },
+                    "height": {
+                        "description": "Given in MUs.",
+                        "type": "number"
+                    }
+                },
+                "required": ["id", "symbol", "x", "y", "width", "height"],
+                "additionalProperties": false
+            }
+        },
+        "objects": {
+            "description": "The list of visible and interactive objects.",
+            "type": "array",
+            "minItems": 0,
+            "items": {
+                "$ref": "objects.json"
+            }
+        }
+    }
+}

@@ -1,0 +1,383 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "https://www.abstractplay.com/schemas/fullthrust/game/commands/1-0-0.json#",
+    "title": "Full Thrust Game Commands",
+    "description": "Definitions of possible commands that change game state",
+    "type": "object",
+    "oneOf": [
+        {
+            "description": "A movement command that updates a ship object directly. You only need provide the fields that have actually changed. Values are absolute.",
+            "properties": {
+                "name": {
+                    "enum": ["moveShip"]
+                },
+                "id": {
+                    "description": "The uuid of the ship.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "course": {
+                    "description": "Expressed as degrees. If given, vector movement is assumed for this ship.",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "speed": {
+                    "description": "Current speed",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "vectors": {
+                    "description": "A list of movement vectors involved in this command. This will be simply added to the existing array.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "objects.json#/$defs/position"
+                    },
+                    "minItems": 2
+                }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Lays a mine",
+            "properties": {
+                "name": {
+                    "enum": ["layMine"]
+                },
+                "ship": {
+                    "description": "The uuid of the ship laying the mine.",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Point should lie somewhere along one of the vectors provided in the previous movement order.",
+                    "$ref": "objects.json#/$defs/position"
+                }
+            },
+            "required": ["name", "ship", "position"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Launches ordnance",
+            "properties": {
+                "name": {
+                    "enum": ["launchOrdnance"]
+                },
+                "ship": {
+                    "description": "The uuid of the launching ship.",
+                    "type": "string"
+                },
+                "systemId": {
+                    "description": "The uuid of the system being triggered. This is what determines the icon to display.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                }
+            },
+            "required": ["name", "ship", "id", "position"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Move ordnance; used in phase 7",
+            "properties": {
+                "name": {
+                    "enum": ["moveOrdnance"]
+                },
+                "id": {
+                    "description": "Uuid of ordnance object",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                }
+            },
+            "required": ["name", "id", "position"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Records the use of a single 'charge' of ammunition. The `launchOrdnance` command does this automatically. You shouldn't need this most of the time.",
+            "properties": {
+                "name": {
+                    "enum": ["useAmmo"]
+                },
+                "ship": {
+                    "description": "Uuid of the ship",
+                    "type": "string"
+                },
+                "systemId": {
+                    "description": "Uuid of the launching system",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "ship", "systemId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Launches fighters",
+            "properties": {
+                "name": {
+                    "enum": ["launchFighters"]
+                },
+                "ship": {
+                    "description": "The uuid of the launching ship.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "The uuid of the fighter squadron being launched.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                }
+            },
+            "required": ["name", "ship", "id", "position"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Moving fighters. Just enter the changed information. Vectors are additive.",
+            "properties": {
+                "name": {
+                    "enum": ["moveFighters"]
+                },
+                "id": {
+                    "description": "Uuid of the fighter group",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Either a 'position' if launched, or a hangar id if docked.",
+                    "oneOf": [
+                        {
+                            "$ref": "objects.json#/$defs/hangar"
+                        },
+                        {
+                            "$ref": "objects.json#/$defs/position"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "vectors": {
+                    "description": "A list of movement vectors. Added to the existing vector array.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "objects.json#/$defs/position"
+                    },
+                    "minItems": 2
+                }
+            },
+            "required": ["name", "id", "position"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Adjust non-positional fighter stats. Provide the changed values.",
+            "properties": {
+                "name": {
+                    "enum": ["adjustFighters"]
+                },
+                "id": {
+                    "description": "Uuid of the fighter group",
+                    "type": "string"
+                },
+                "number": {
+                    "description": "The number of surviving fighters in the squadron",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "endurance": {
+                    "description": "The squad's endurance, which is reset when recovered.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "skill": {
+                    "description": "Only needed if you are playing with ace/turkey rules",
+                    "enum": ["standard", "ace", "turkey"],
+                    "default": "standard"
+                }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Fire a weapon at a target",
+            "properties": {
+                "name": {
+                    "enum": ["fireWeapon"]
+                },
+                "ship": {
+                    "description": "The uuid of the firing ship",
+                    "type": "string"
+                },
+                "weapon": {
+                    "description": "The uid of the firing weapon system",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "The uuid of target being fired at, whether ship, ordnance, or other",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "ship", "weapon", "target"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Apply damage to a ship object",
+            "properties": {
+                "name": {
+                    "enum": ["dmgShip"]
+                },
+                "ship": {
+                    "description": "The uuid of the ship object",
+                    "type": "string"
+                },
+                "hull": {
+                    "description": "Number of hull points lost. Numbers are additive to existing damage.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "armour": {
+                    "description": "Number of boxes of armour lost. First element is the innermost shell. Numbers are additive to existing damage.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["name", "ship", "hull"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Regenerate boxes of armour",
+            "properties": {
+                "name": {
+                    "enum": ["regenArmour"]
+                },
+                "ship": {
+                    "description": "The uuid of the ship in question",
+                    "type": "string"
+                },
+                "armour": {
+                    "description": "Number of boxes of armour to repair. First element is the innermost shell.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["name", "ship", "armour"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Disable a system",
+            "properties": {
+                "name": {
+                    "enum": ["sysDisable"]
+                },
+                "ship": {
+                    "description": "Uuid of the ship",
+                    "type": "string"
+                },
+                "system": {
+                    "description": "Uid of the system",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "Helps keep track of whether a system has been repaired before or not.",
+                    "enum": ["damaged", "destroyed"],
+                    "default": "damaged"
+                }
+            },
+            "required": ["name", "ship", "system"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Enable a system",
+            "properties": {
+                "name": {
+                    "enum": ["sysEnable"]
+                },
+                "ship": {
+                    "description": "Uuid of the ship",
+                    "type": "string"
+                },
+                "system": {
+                    "description": "Uid of the system",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "Helps to keep track of whether a system has been repaired before or not.",
+                    "oneOf": [
+                        {
+                            "enum": ["repaired"]
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                }
+            },
+            "required": ["name", "ship", "system"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Destroy an object (remove it completely from the game)",
+            "properties": {
+                "name": {
+                    "enum": ["objDestroy"]
+                },
+                "uuid": {
+                    "description": "Uuid of the object in question",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "uuid"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Hide an object temporarily (e.g., cloaking a ship). To show a ship again, issue a `moveShip` command with valid coordinates.",
+            "properties": {
+                "name": {
+                    "enum": ["objHide"]
+                },
+                "uuid": {
+                    "description": "Uuid of the object in question",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "uuid"],
+            "additionalProperties": false
+        },
+        {
+            "description": "A generic command used just to insert things into the combat log. These commands have no effect on the actual game visuals.",
+            "properties": {
+                "name": {
+                    "enum": ["_custom"]
+                },
+                "msg": {
+                    "type": "string"
+                }
+            },
+            "required": ["name", "msg"],
+            "additionalProperties": false
+        }
+    ]
+}
