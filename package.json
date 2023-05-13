@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean && npm run schemas",
-    "postbuild": "shx cp -r src/schemas dist && rimraf -g dist/schemas/*.d.ts",
+    "postbuild": "shx cp -r src/schemas dist && rimraf -g dist/schemas/*.d.ts && npx ts-node --esm bin/exportCounters.ts",
     "dev": "set NODE_ENV=development && vite",
     "build": "set NODE_ENV=production && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
