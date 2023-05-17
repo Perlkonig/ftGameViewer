@@ -13,12 +13,12 @@ interface IProblem {
 
 export interface IDerivedState {
     state?: FullThrustGamePosition;
-    /* Errors signal a fatal error.
-       If errors are present, then `state` should be undefined.
+    /* Errors are fatal.
+     * If errors are present, then `state` should be undefined.
     */
     error?: IProblem;
     /* Warnings signal potential rules issues that don't stop
-       the state from being calculated (e.g., firing a disabled weapon).
+     * the state from being calculated (e.g., firing a disabled weapon).
     */
     warnings?: IProblem[];
 }

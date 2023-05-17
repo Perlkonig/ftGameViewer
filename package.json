@@ -26,6 +26,7 @@
     "svelte": "^3.59.1",
     "svelte-check": "^3.3.2",
     "svelte-preprocess": "^5.0.3",
+    "svgo": "^3.0.2",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4",
     "vite": "^4.3.5"
@@ -36,7 +37,7 @@
     "ajv-formats": "^2.1.1",
     "crypto-js": "^4.1.1",
     "fast-xml-parser": "^4.2.2",
-    "ftlibship": "github:Perlkonig/ftLibShip#v2.2.0",
+    "ftlibship": "file:../ftLibShip/ftlibship-2.2.0.tgz",
     "json-stringify-deterministic": "^1.0.8",
     "nanoid": "^4.0.2"
   }

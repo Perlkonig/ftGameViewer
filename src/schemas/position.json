@@ -32,6 +32,44 @@
                 "required": ["id", "colour"]
             }
         },
+        "map": {
+            "description": "Determines the default dimensions and behaviour of the map display.",
+            "type": "object",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "mode": {
+                            "description": "A fixed map has firm boundaries, as if you were playing on a kitchen table. This is best if you're dealing with map features or otherwise relatively fixed objectives you expect players to stay close to.",
+                            "enum": ["fixed"]
+                        },
+                        "width": {
+                            "description": "In movement units. The default approximates a six-foot-long table.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 72
+                        },
+                        "height": {
+                            "description": "In movement units. The default approximates a four-foot-wide table.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 48
+                        }
+                    },
+                    "required": ["mode", "width", "height"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "mode": {
+                            "description": "A fluid map is ever changing. It will always be large enough to encompass all visible objects. Users can then add a dynamic buffer, allowing them handle movement outside of the boundaries or to introduce new objects. This is the best map type for fights with no fixed point that players must stay close to.",
+                            "enum": ["fluid"]
+                        }
+                    },
+                    "required": ["mode"]
+                }
+            ]
+        },
         "mapFeatures": {
             "description": "Map features are background features like planets or other phenomena. They do not move and cannot be interacted with.",
             "type": "array",
@@ -47,12 +85,12 @@
                         "description": "All features must be expressed as an svg `<symbol>` tag with both a `viewBox` attribute and an `id` attribute that matches the `id` given above.",
                         "type": "string"
                     },
-                    "x": {
-                        "description": "Given in MUs.",
+                    "cx": {
+                        "description": "Centre x coordinate, given in MUs.",
                         "type": "number"
                     },
-                    "y": {
-                        "description": "Given in MUs.",
+                    "cy": {
+                        "description": "Centre y coordinate, given in MUs.",
                         "type": "number"
                     },
                     "width": {

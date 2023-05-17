@@ -1,11 +1,15 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount, afterUpdate } from 'svelte';
     // import { nanoid } from "nanoid";
     import { tweened } from "svelte/motion";
     import { sineOut } from 'svelte/easing';
     import { mousePos } from "@/stores/writeMousePos";
     import { beacon } from '@/stores/writeBeacon';
     import { currentState } from '@/stores/derivedState';
+    import { mapBuffers } from '@/stores/writeBuffer';
+    import { clickMode } from '@/stores/writeClickMode';
+    import type { Position } from '@/schemas/position';
+    import { initialState } from '@/stores/writeInitialState';
 
     let pixelsPerMU = 100;
     let maxX = 72 * pixelsPerMU;
@@ -30,13 +34,55 @@
     let innerSvg: SVGSVGElement;
     let outerSvg: SVGSVGElement;
     onMount(() => {
-        $mousePos = {x: 0, y: 0};
-        currX.set(0);
-        currY.set(0);
-        currWidth.set(maxX);
-        currHeight.set(maxY);
-        console.log($currentState);
+        resetMap();
     });
+
+    const resetMap = () => {
+        let originX = 0;
+        let originY = 0;
+        if ( ($currentState !== undefined) && ($currentState.state !== undefined) && ($currentState.state.map !== undefined) ) {
+            if ($currentState.state.map.mode === "fixed")  {
+                maxX = $currentState.state.map.width * pixelsPerMU;
+                maxY = $currentState.state.map.height * pixelsPerMU;
+            } else {
+                let [mnx, mny, mxx, mxy] = getVisibleDimensions();
+                if (mnx === Infinity) { mnx = 0; }
+                if (mxx === -Infinity) { mxx = 72; }
+                if (mny === Infinity) { mny = 0; }
+                if (mxy === -Infinity) { mxy = 48; }
+                originX = mnx * pixelsPerMU;
+                originY = mny * pixelsPerMU;
+                maxX = mxx * pixelsPerMU;
+                maxY = mxy * pixelsPerMU;
+            }
+        }
+        $mousePos = {x: originX, y: originY};
+        currX.set(originX);
+        currY.set(originY);
+        currWidth.set(maxX - originX);
+        currHeight.set(maxY - originY);
+    }
+    initialState.subscribe(() => resetMap());
+
+    const getVisibleDimensions = (): [number, number, number, number] => {
+        let minX = Infinity;
+        let maxX = -Infinity;
+        let minY = Infinity;
+        let maxY = -Infinity;
+
+        if ( ($currentState !== undefined) && ($currentState.state !== undefined) && ($currentState.state.objects !== undefined) && ($currentState.state.objects.length > 0) ) {
+            for (const obj of $currentState.state.objects) {
+                if ( (obj.position !== undefined) && (obj.position.hasOwnProperty("x")) ) {
+                    minX = Math.min(minX, (obj.position as Position).x);
+                    minY = Math.min(minY, (obj.position as Position).y);
+                    maxX = Math.max(maxX, (obj.position as Position).x);
+                    maxY = Math.max(maxY, (obj.position as Position).y);
+                }
+            }
+        }
+
+        return [minX, minY, maxX, maxY];
+    }
 
     const handleWheel = (e: WheelEvent) => {
         e.preventDefault();
@@ -191,7 +237,11 @@
             currMouse.y = maxY;
         }
 
-        $beacon = { x: currMouse.x, y: currMouse.y};
+        if ($clickMode !== undefined) {
+            if ($clickMode === "beacon") {
+                $beacon = { x: currMouse.x, y: currMouse.y};
+            }
+        }
     }
 
     const handleRightClick = (e: MouseEvent) => {

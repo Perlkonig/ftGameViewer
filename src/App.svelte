@@ -3,6 +3,8 @@
     import Map from './components/Map.svelte';
     import MousePos from './components/MousePos.svelte';
     import Nav from './components/Nav.svelte';
+    import Commands from './components/Commands.svelte';
+    import Sidebar from './components/Sidebar.svelte';
 
     const optionsToast = {};
 </script>
@@ -25,14 +27,14 @@
                 <Map />
             </div>
             <div class="column is-one-fifth">
-                <p>Game log here</p>
+                <Sidebar />
             </div>
         </div>
     </div>
 
     <!-- Bottom functions -->
     <div class="container">
-
+        <Commands />
     </div>
 </main>
 
