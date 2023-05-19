@@ -2,6 +2,9 @@
     import { toast } from "@zerodevx/svelte-toast";
     import { initialState } from "@/stores/writeInitialState";
 
+    const colours = ["#e41a1c", "#377eb8", "#4daf4a", "#ffff33", "#984ea3", "#ff7f00", "#a65628", "#f781bf", "#999999"];
+    const coloursCB = ["#ddcc77", "#cc6677", "#aa4499", "#882255", "#332288", "#117733", "#44aa99", "#88ccee"];
+
     interface IPlayer {
         id: string;
         colour: string;
@@ -11,18 +14,22 @@
     let players: [IPlayer, ...IPlayer[]] = [
         {
             id: "Player 1",
-            colour: "#ff0000",
+            colour: colours[0],
             vp: 0
         }
     ];
     const reColour = /^#[A-Fa-f0-9]{6}$/;
 
     const addPlayer = () => {
-        players.push({
+        const node = {
             id: `Player ${players.length + 1}`,
             colour: "",
             vp: 0
-        });
+        };
+        if (players.length < colours.length) {
+            node.colour = colours[players.length];
+        }
+        players.push(node);
         players = players;
     }
 

@@ -49,6 +49,7 @@ export const currentState = derived(
                     });
                 }
             } catch (e) {
+                console.log(`Error: ${e}`);
                 return {
                     error: {
                         location: i,

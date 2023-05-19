@@ -39,6 +39,10 @@
     let svgEle: SVGSVGElement;
     let nameEle: SVGTextElement;
     let statsEle: SVGTextElement;
+    let namex: number;
+    let namey: number;
+    let statsx: number;
+    let statsy: number;
     onMount(() => {
         svgEle = (document.getElementById(uuid) as unknown) as SVGSVGElement;
         nameEle = (document.getElementById("_resizeNamePlate") as unknown) as SVGTextElement;
@@ -46,25 +50,42 @@
         if ( (svgEle !== undefined) && (svgEle !== null) ) {
             const origWidth = svgEle.viewBox.baseVal.width;
             if (origWidth !== undefined) {
+                if (nameEle !== undefined) {
+                    namex = parseFloat(nameEle.getAttribute("x"));
+                    namey = parseFloat(nameEle.getAttribute("y"));
+                }
+                if (statsEle !== undefined) {
+                    statsx = parseFloat(statsEle.getAttribute("x"));
+                    statsy = parseFloat(statsEle.getAttribute("y"));
+                }
+            }
+        }
+        resize();
+    });
+
+    afterUpdate(() => {
+        resize();
+    });
+
+    const resize = () => {
+        if ( (svgEle !== undefined) && (svgEle !== null) ) {
+            const origWidth = svgEle.viewBox.baseVal.width;
+            if (origWidth !== undefined) {
                 const npValue = newSize(origWidth, nameEle.getBBox());
                 if (npValue !== undefined) {
                     nameEle.setAttribute("transform", "matrix("+npValue+", 0, 0, "+npValue+", 0,0)");
-                    const currx = parseFloat(nameEle.getAttribute("x"));
-                    const curry = parseFloat(nameEle.getAttribute("y"));
-                    nameEle.setAttribute("x", (currx / npValue).toString());
-                    nameEle.setAttribute("y", (curry / npValue).toString());
+                    nameEle.setAttribute("x", (namex / npValue).toString());
+                    nameEle.setAttribute("y", (namey / npValue).toString());
                 }
                 const statValue = newSize(origWidth, statsEle.getBBox());
                 if (statValue !== undefined) {
                     statsEle.setAttribute("transform", "matrix("+statValue+", 0, 0, "+statValue+", 0,0)");
-                    const currx = parseFloat(statsEle.getAttribute("x"));
-                    const curry = parseFloat(statsEle.getAttribute("y"));
-                    statsEle.setAttribute("x", (currx / statValue).toString());
-                    statsEle.setAttribute("y", (curry / statValue).toString());
+                    statsEle.setAttribute("x", (statsx / statValue).toString());
+                    statsEle.setAttribute("y", (statsy / statValue).toString());
                 }
             }
         }
-    });
+    }
 
     const newSize = (origWidth: number, bb: DOMRect): number|undefined => {
         const cellsize = 50;

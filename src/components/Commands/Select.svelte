@@ -20,6 +20,10 @@
     let selected = "";
     let option: ICommand;
     $: option = options.find(o => o.key === selected);
+
+    const handleDone = () => {
+        selected = "";
+    }
 </script>
 
 <div class="field">
@@ -40,7 +44,7 @@
 
 <div class="container">
 {#if option !== undefined}
-    <svelte:component this={option.component} />
+    <svelte:component this={option.component} on:done={handleDone} />
 {/if}
 </div>
 

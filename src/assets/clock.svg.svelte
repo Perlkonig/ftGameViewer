@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 102 102" width="auto" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 102 102" width="100%" height="100%">
     <g>
         <path style="stroke-linejoin:round;stroke:#000000;stroke-linecap:round;stroke-width:1.9055;fill:#f2f2f2" transform="matrix(1.0496 0 0 1.0496 -2.0927 -.93294)" d="m96.317 48.527c0 25.77-20.915 46.685-46.685 46.685s-46.685-20.915-46.685-46.685c-0.0004-25.77 20.915-46.685 46.685-46.685 25.77-0.0004 46.685 20.915 46.685 46.685z" />
         <path style="fill:#f9f9f9" transform="matrix(1.2276 0 0 1.2633 -11.06 -17.096)" d="m86.399 50.648c0 19.663-16.423 35.621-36.658 35.621s-36.658-15.958-36.658-35.621c0-19.664 16.423-35.622 36.658-35.622s36.658 15.958 36.658 35.622z" />
