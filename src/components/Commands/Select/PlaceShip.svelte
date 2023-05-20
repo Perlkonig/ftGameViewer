@@ -6,6 +6,7 @@
     import { commands } from "@/stores/writeCommands";
     import { nanoid } from "nanoid";
     import { toast } from "@zerodevx/svelte-toast";
+    import deepclone from "rfdc/default";
     import { XMLBuilder, XMLValidator, XMLParser } from "fast-xml-parser";
     import { validate } from "ftlibship";
     import type { Position, FullThrustShip } from "@/schemas/commands";
@@ -137,13 +138,15 @@
     let owner: string;
     let ownerColour: string;
     $: if (owner !== undefined) {
-        const obj = $currentState.state.players.find(x => x.id === owner);
-        if (obj !== undefined) {
-            ownerColour = obj.colour;
-            cmd.owner = obj.id;
-        } else {
-            ownerColour = undefined;
-            cmd.owner = undefined;
+        if ($currentState.state !== undefined) {
+            const obj = $currentState.state.players.find(x => x.id === owner);
+            if (obj !== undefined) {
+                ownerColour = obj.colour;
+                cmd.owner = obj.id;
+            } else {
+                ownerColour = undefined;
+                cmd.owner = undefined;
+            }
         }
     }
 
@@ -226,8 +229,8 @@
         }
 
         if (validShip) {
-            commands.update(l => [...l, cmd])
-            console.log("saving command");
+            $commands.push(deepclone(cmd));
+            $commands = $commands;
             dispatch("done");
         }
     }
@@ -275,7 +278,7 @@
                     <label class="label" for="baseClass">Base</label>
                     <div class="control">
                         <div class="select">
-                            <select name="baseClass" bind:value={counterBase}>
+                            <select name="baseClass" bind:value={counterBase} on:change={() => counterVariant = 1}>
                             {#each [...new Set(presets.map(x => x.base))].sort((a, b) => a - b) as n}
                                 <option value="{n}">{n}</option>
                             {/each}
@@ -333,7 +336,8 @@
         </div>
     {/if}
         <div class="columns">
-            <div class="column is-two-thirds">
+            <div class="column">
+            {#if $currentState.state !== undefined}
                 <div class="field">
                     <label class="label" for="owner">Owner</label>
                     <div class="control">
@@ -345,54 +349,34 @@
                         {/each}
                     </div>
                 </div>
+            {/if}
             </div>
             <div class="column">
-            {#key cmd.svg}
-                {#if ownerColour !== undefined}
-                    <RenderCounter
-                        svg={cmd.svg}
-                        colour={ownerColour}
-                    />
-                {/if}
-            {/key}
-            </div>
-        </div>
-        <div class="field">
-            <label class="label" for="position">Position</label>
-            <div class="control">
-                <input class="input" type="text" name="position" bind:value={posStr} readonly>
-            </div>
-            <p class="help">Left-click on the map where you want the ship to go. A beacon will appear. You can zoom into the map to get more precise. Additional left-clicks will move the beacon. You can also right-click to clear it.</p>
-        </div>
-        <div class="columns">
-            <div class="column is-two-thirds">
                 <div class="field">
-                    <label class="label" for="facing">Facing</label>
-                    <div class="control" style="max-width: 15vw" on:click={handleClockClick}>
-                        <Clock />
+                    <label class="label" for="position">Position</label>
+                    <div class="control">
+                        <input class="input" type="text" name="position" bind:value={posStr} readonly>
                     </div>
-                    <p class="help">Select the ship's initial facing by clicking on the appropriate number.</p>
+                    <p class="help">Left-click on the map where you want the ship to go. A beacon will appear. You can zoom into the map to get more precise. Additional left-clicks will move the beacon. You can also right-click to clear it.</p>
                 </div>
             </div>
-            <div class="column">
-            {#key cmd.svg}
-                {#if ownerColour !== undefined && facing !== undefined}
-                    <RenderCounter
-                        svg={cmd.svg}
-                        colour={ownerColour}
-                        facing={cmd.facing}
-                    />
-                {/if}
-            {/key}
-            </div>
-        </div>
-        <div class="columns">
             <div class="column">
                 <div class="field">
                     <label class="label" for="shipSpeed">Speed</label>
                     <div class="control">
                         <input class="input" name="shipSpeed" type="number" min="0" step="1" bind:value={cmd.speed}>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <div class="field">
+                    <label class="label" for="facing">Facing</label>
+                    <div class="control" style="max-width: 15vw" on:click={handleClockClick}>
+                        <Clock />
+                    </div>
+                    <p class="help">Select the ship's initial facing by clicking on the appropriate number.</p>
                 </div>
             </div>
             <div class="column">

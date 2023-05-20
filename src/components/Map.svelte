@@ -10,6 +10,9 @@
     import { clickMode } from '@/stores/writeClickMode';
     import type { Position } from '@/schemas/position';
     import { initialState } from '@/stores/writeInitialState';
+    import RenderCounter from './RenderCounter.svelte';
+    import type { FullThrustShip } from 'ftlibship';
+    import { userSettings } from '@/stores/writeUserSettings';
 
     let pixelsPerMU = 100;
     let maxX = 72 * pixelsPerMU;
@@ -239,14 +242,16 @@
 
         if ($clickMode !== undefined) {
             if ($clickMode === "beacon") {
-                $beacon = { x: currMouse.x, y: currMouse.y};
+                $beacon = { x: currMouse.x / pixelsPerMU, y: currMouse.y / pixelsPerMU};
             }
         }
     }
 
     const handleRightClick = (e: MouseEvent) => {
-        e.preventDefault();
-        $beacon = undefined;
+        if ($clickMode !== undefined) {
+            e.preventDefault();
+            $beacon = undefined;
+        }
     }
 
     const getInnermostHovered = (): Element|undefined => {
@@ -295,6 +300,12 @@
         }
 
     }
+
+    const smallestGlyphRatio = 0.5;
+    const ship2mu = (ship: FullThrustShip): number => {
+        let ratio = ship.mass / 75;
+        return Math.max(smallestGlyphRatio, ratio);
+    }
 </script>
 
 <section class="container">
@@ -319,6 +330,12 @@
                     <line x1="{currMouse.y}" y1="0" x2="{currMouse.y}" y2="{rulerWidth}" stroke="red" stroke-width="{pixelsPerMU / 20}"/>
                 {/if}
                 </symbol>
+                <!-- Define interactive object glyphs -->
+                {#if ($currentState.state !== undefined) && ($currentState.state.objects !== undefined)}
+                    {#each $currentState.state.objects as obj}
+                        <RenderCounter object={obj}/>
+                    {/each}
+                {/if}
             </defs>
 
             <!-- Position the rulers -->
@@ -330,9 +347,24 @@
             <!-- And here's the map -->
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <svg bind:this="{innerSvg}" viewBox="{$currX} {$currY} {$currWidth} {$currHeight}" x="{rulerWidth + rulerGap}" y="{rulerWidth + rulerGap}" width="{maxX}" height="{maxY}" on:wheel="{handleWheel}" on:mousedown="{dragStart}" on:mouseup="{dragEnd}" on:mouseleave="{dragEnd}" on:mousemove="{dragMouse}" on:click="{handleLeftClick}" on:contextmenu={handleRightClick}>
-                <rect id="_background" x="0" y="0" width="{maxX}" height="{maxY}" fill="black" />
+                <rect x="0" y="0" width="{maxX}" height="{maxY}" fill="black" opacity="{$userSettings.opacity !== undefined ? $userSettings.opacity : 1}" />
+            <!-- Place interactive objects -->
+            {#if ($currentState.state !== undefined) && ($currentState.state.objects !== undefined)}
+                {#each $currentState.state.objects as obj}
+                    {#if obj.objType === "ship"}
+                        <use
+                            id="ship_{obj.id}"
+                            href="#{obj.id}"
+                            x="{(obj.position.x * pixelsPerMU) - ((ship2mu(obj.object) * pixelsPerMU) / 2)}"
+                            y="{(obj.position.y * pixelsPerMU) - ((ship2mu(obj.object) * pixelsPerMU) / 2)}"
+                            width="{ship2mu(obj.object) * pixelsPerMU}"
+                            height="{ship2mu(obj.object) * pixelsPerMU}"
+                        />
+                    {/if}
+                {/each}
+            {/if}
             {#if $beacon !== undefined}
-                <circle id="_beacon" class="beacon" cx="{$beacon.x}" cy="{$beacon.y}" r="1" fill="white" opacity="0.5" />
+                <circle id="_beacon" class="beacon" cx="{$beacon.x * pixelsPerMU}" cy="{$beacon.y * pixelsPerMU}" r="1" fill="white" opacity="0.5" />
             {/if}
             </svg>
         </svg>

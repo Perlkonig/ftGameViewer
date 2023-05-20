@@ -5,7 +5,6 @@
     let lst: string[];
     commands.subscribe((val) => {
         lst = val.map(c => c.name);
-        console.log(val);
     });
 </script>
 

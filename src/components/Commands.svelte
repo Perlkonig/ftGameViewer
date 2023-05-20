@@ -6,7 +6,11 @@
 </script>
 
 {#if $currentState.state === undefined}
-    <p>Current state is undefined, so there are no commands I can offer. Refresh to start all over, or load a game.</p>
+    {#if $currentState.error !== undefined}
+        <div class="content" style="font-color: red; font-size: smaller">
+            <p>Move #{$currentState.error.location + 1}, command "{$currentState.error.command}"<br>{$currentState.error.description}</p>
+        </div>
+    {/if}
 {:else}
     {#if $currentState.state.map === undefined}
         <Map />

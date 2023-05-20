@@ -60,6 +60,7 @@
                 }
             }
         }
+        setTimeout(resize, 1000);
         resize();
     });
 

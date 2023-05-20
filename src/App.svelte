@@ -5,8 +5,10 @@
     import Nav from './components/Nav.svelte';
     import Commands from './components/Commands.svelte';
     import Sidebar from './components/Sidebar.svelte';
+    import LoadSave from './components/LoadSave.svelte';
 
     const optionsToast = {};
+    let activeTab: "explore"|"act" = "explore";
 </script>
 
 <main class="container p-6">
@@ -17,11 +19,12 @@
 
     <!-- Top functions -->
     <div class="container">
-        <MousePos />
+        <LoadSave />
     </div>
 
     <!-- Map -->
     <div class="container">
+        <MousePos />
         <div class="columns">
             <div class="column">
                 <Map />
@@ -34,7 +37,27 @@
 
     <!-- Bottom functions -->
     <div class="container">
+        <div class="tabs">
+            <ul>
+                <li
+                    class="{activeTab === "explore" ? "is-active" : ""}"
+                    on:click={() => activeTab = "explore"}
+                >
+                    <a>Explore</a>
+                </li>
+                <li
+                    class="{activeTab === "act" ? "is-active" : ""}"
+                    on:click={() => activeTab = "act"}
+                >
+                    <a>Act</a>
+                </li>
+            </ul>
+        </div>
+    {#if activeTab === "explore"}
+        Explore
+    {:else if activeTab === "act"}
         <Commands />
+    {/if}
     </div>
 </main>
 

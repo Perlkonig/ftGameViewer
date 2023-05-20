@@ -4,6 +4,7 @@ import { commands } from "./writeCommands";
 import { headOffset } from "./writeHeadOffset";
 import type { FullThrustGamePosition } from "@/schemas/position";
 import { applyCommand } from "@/lib/applyCommand";
+import deepclone from "rfdc/default";
 
 interface IProblem {
     location: number;
@@ -33,7 +34,7 @@ export const currentState = derived(
         }
 
         // Make a copy of the state to work with
-        let state = JSON.parse(JSON.stringify(initialState)) as FullThrustGamePosition;
+        let state = deepclone(initialState) as FullThrustGamePosition;
 
         const errors: IProblem[] = [];
         const warnings: IProblem[] = [];
