@@ -60,8 +60,12 @@
                 }
             }
         }
-        setTimeout(resize, 1000);
-        resize();
+        setTimeout(resize, 500);
+
+        // // Add click handler to all <use> tags in the SVG
+        // for (const ele of document.getElementsByTagName("use")) {
+        //     ele.addEventListener("click", handleSysClick);
+        // }
     });
 
     afterUpdate(() => {
@@ -96,6 +100,18 @@
         if (value !== Infinity) { return value; }
         return undefined;
     }
+
+    // const handleSysClick = (e: MouseEvent): void => {
+    //     // find system
+    //     // if it's a system with arcs or ranges, display them on the map
+    //     // regardless of system, provide basic info
+    // }
 </script>
 
 {@html svg}
+
+<style>
+    :global(svg * text) {
+        cursor: default;
+    }
+</style>

@@ -6,9 +6,11 @@
     import Commands from './components/Commands.svelte';
     import Sidebar from './components/Sidebar.svelte';
     import LoadSave from './components/LoadSave.svelte';
+    import Explore from './components/Explore.svelte';
+    import Measure from './components/Measure.svelte';
 
     const optionsToast = {};
-    let activeTab: "explore"|"act" = "explore";
+    let activeTab: "explore"|"act"|"measure" = "explore";
 </script>
 
 <main class="container p-6">
@@ -46,6 +48,12 @@
                     <a>Explore</a>
                 </li>
                 <li
+                    class="{activeTab === "measure" ? "is-active" : ""}"
+                    on:click={() => activeTab = "measure"}
+                >
+                    <a>Measure</a>
+                </li>
+                <li
                     class="{activeTab === "act" ? "is-active" : ""}"
                     on:click={() => activeTab = "act"}
                 >
@@ -54,7 +62,9 @@
             </ul>
         </div>
     {#if activeTab === "explore"}
-        Explore
+        <Explore />
+    {:else if activeTab === "measure"}
+        <Measure />
     {:else if activeTab === "act"}
         <Commands />
     {/if}
