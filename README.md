@@ -8,6 +8,8 @@ The game runs entirely in your browser. There is no server architecture, and int
 
 I sadly just have not had the time to focus on this project, so I'm putting it out into the world. I'm not abandoning it, but I just don't know when I will have time to focus on this. I'm active on GitHub and will monitor for pull requests and the like. If you want to get involved in the project, do let me know.
 
+Currently the system displays a pan+zoomable map and lets you define players and place ships. You can measure distance between objects, and if you click on a ship, you can view firing arcs for some weapon systems, but not all. There's still *lots* to do to make this a workable tool.
+
 ## How it Works
 
 ## Support
