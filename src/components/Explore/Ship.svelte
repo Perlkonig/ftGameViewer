@@ -147,6 +147,7 @@
                                     // long: 2MU for 48
                                 // submunition: 6, 12, 18
                                 // pulser: 12, 24, 48
+
                                 // beam, emp, plasmaCannon, phaser, graser, transporter, needle, gravitic?: 12 per
                                 // graser, heavy: 18 per
                                 case "beam":

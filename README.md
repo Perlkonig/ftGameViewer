@@ -6,6 +6,8 @@ The game runs entirely in your browser. There is no server architecture, and int
 
 **NOTE:** The page is 100% designed for mouse and keyboard on a big screen. I welcome pull requests related to touch controls and accessibility, but a Full Thrust game really is not ideal for small screens.
 
+I sadly just have not had the time to focus on this project, so I'm putting it out into the world. I'm not abandoning it, but I just don't know when I will have time to focus on this. I'm active on GitHub and will monitor for pull requests and the like. If you want to get involved in the project, do let me know.
+
 ## How it Works
 
 ## Support

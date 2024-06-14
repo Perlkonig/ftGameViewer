@@ -21,7 +21,7 @@
 </script>
 
 <div class="content">
-    <p>Use the form below to define the game's map. Typically the map is not changed once the game starts.</p>
+    <p>No game is currently loaded. Start by using the form below to define the game's map. Typically the map is not changed once the game starts.</p>
 </div>
 <div class="field">
     <div class="control">
