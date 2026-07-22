@@ -1,0 +1,992 @@
+{
+  "version": "1.0.0",
+  "name": "Intro Scenario",
+  "createdAt": "2026-07-12T00:18:43.557Z",
+  "turn": 1,
+  "phase": 1,
+  "dicePolicy": "hybrid",
+  "allowVectorMovement": false,
+  "map": {
+    "mode": "fixed",
+    "width": 72,
+    "height": 48
+  },
+  "players": [
+    {
+      "id": "Player 1",
+      "colour": "#e41a1c",
+      "vp": 0
+    },
+    {
+      "id": "Player 2",
+      "colour": "#377eb8",
+      "vp": 0
+    }
+  ],
+  "initialState": {
+    "map": {
+      "mode": "fixed",
+      "width": 72,
+      "height": 48
+    },
+    "players": [
+      {
+        "id": "Player 1",
+        "colour": "#e41a1c",
+        "vp": 0
+      },
+      {
+        "id": "Player 2",
+        "colour": "#377eb8",
+        "vp": 0
+      }
+    ],
+    "objects": []
+  },
+  "commands": [
+    {
+      "name": "placeShip",
+      "id": "CruiserA1",
+      "object": {
+        "hull": {
+          "points": 26,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [
+          [
+            5,
+            0
+          ]
+        ],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 4,
+            "advanced": false,
+            "id": "V3EEn"
+          },
+          {
+            "name": "fireControl",
+            "id": "aGa9l"
+          },
+          {
+            "name": "fireControl",
+            "id": "qjP-D"
+          },
+          {
+            "name": "screen",
+            "area": false,
+            "advanced": false,
+            "id": "jOZP_"
+          },
+          {
+            "name": "ftl",
+            "advanced": false,
+            "id": "il46r"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "qWqFr"
+          },
+          {
+            "name": "pds",
+            "id": "jpZ1u"
+          },
+          {
+            "name": "pds",
+            "id": "AuYSB"
+          },
+          {
+            "name": "pds",
+            "id": "JRsmG"
+          },
+          {
+            "name": "pds",
+            "id": "1f4Qj"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "xBY4j"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "76XDy"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "vs5J5"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "wN6mZ"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "SH5Z2"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "6484S"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 300,
+        "cpv": 290,
+        "name": "A1",
+        "mass": 89,
+        "class": "Heavy Cruiser"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g transform=\"matrix(1 0 0 .8522 -3.609 7.08)\"><rect width=\"81.504\" height=\"159.167\" x=\"52.985\" y=\"35.07\" rx=\"40.752\" ry=\"11.758\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.60189 0 0 2.27335 -232.193 -148.297)\"/></g><g transform=\"matrix(1 0 0 1.9226 1.179 -176.1)\"><rect width=\"113.975\" height=\"23.147\" x=\"33.838\" y=\"141.205\" ry=\"3.156\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><g transform=\"translate(0 -.533)\"><g transform=\"translate(-1.665 113.364)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.58932 0 0 .52947 -274.089 16.654)\"/><rect width=\"34.391\" height=\"46.897\" x=\"6.952\" y=\"17.731\" ry=\"6.395\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g><rect width=\"17.6\" height=\"66.454\" x=\"13.683\" y=\"-160.967\" ry=\"9.062\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/></g><g transform=\"matrix(-1 0 0 1 177.899 -.533)\"><g transform=\"translate(-1.665 113.364)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.58932 0 0 .52947 -274.089 16.654)\"/><rect width=\"34.391\" height=\"46.897\" x=\"6.952\" y=\"17.731\" ry=\"6.395\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g><rect width=\"17.6\" height=\"66.454\" x=\"13.683\" y=\"-160.967\" ry=\"9.062\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/></g></g></symbol>",
+      "owner": "Player 1",
+      "position": {
+        "x": 11.185921371284794,
+        "y": 12.196840540965564
+      },
+      "facing": 3,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "CruiserA2",
+      "object": {
+        "hull": {
+          "points": 26,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [
+          [
+            5,
+            0
+          ]
+        ],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 4,
+            "advanced": false,
+            "id": "V3EEn"
+          },
+          {
+            "name": "fireControl",
+            "id": "aGa9l"
+          },
+          {
+            "name": "fireControl",
+            "id": "qjP-D"
+          },
+          {
+            "name": "screen",
+            "area": false,
+            "advanced": false,
+            "id": "jOZP_"
+          },
+          {
+            "name": "ftl",
+            "advanced": false,
+            "id": "il46r"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "qWqFr"
+          },
+          {
+            "name": "pds",
+            "id": "jpZ1u"
+          },
+          {
+            "name": "pds",
+            "id": "AuYSB"
+          },
+          {
+            "name": "pds",
+            "id": "JRsmG"
+          },
+          {
+            "name": "pds",
+            "id": "1f4Qj"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "xBY4j"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "76XDy"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "vs5J5"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "wN6mZ"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "SH5Z2"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "6484S"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 300,
+        "cpv": 290,
+        "name": "A2",
+        "mass": 89,
+        "class": "Heavy Cruiser"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g transform=\"matrix(1 0 0 .8522 -3.609 7.08)\"><rect width=\"81.504\" height=\"159.167\" x=\"52.985\" y=\"35.07\" rx=\"40.752\" ry=\"11.758\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.60189 0 0 2.27335 -232.193 -148.297)\"/></g><g transform=\"matrix(1 0 0 1.9226 1.179 -176.1)\"><rect width=\"113.975\" height=\"23.147\" x=\"33.838\" y=\"141.205\" ry=\"3.156\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><g transform=\"translate(0 -.533)\"><g transform=\"translate(-1.665 113.364)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.58932 0 0 .52947 -274.089 16.654)\"/><rect width=\"34.391\" height=\"46.897\" x=\"6.952\" y=\"17.731\" ry=\"6.395\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g><rect width=\"17.6\" height=\"66.454\" x=\"13.683\" y=\"-160.967\" ry=\"9.062\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/></g><g transform=\"matrix(-1 0 0 1 177.899 -.533)\"><g transform=\"translate(-1.665 113.364)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.58932 0 0 .52947 -274.089 16.654)\"/><rect width=\"34.391\" height=\"46.897\" x=\"6.952\" y=\"17.731\" ry=\"6.395\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g><rect width=\"17.6\" height=\"66.454\" x=\"13.683\" y=\"-160.967\" ry=\"9.062\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/></g></g></symbol>",
+      "owner": "Player 1",
+      "position": {
+        "x": 11.260821198301619,
+        "y": 33.39349158672748
+      },
+      "facing": 3,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "FrigateA1",
+      "object": {
+        "hull": {
+          "points": 5,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 6,
+            "advanced": false,
+            "id": "jb-Ue"
+          },
+          {
+            "name": "fireControl",
+            "id": "SEVgE"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "ENNXK"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "sXCcB"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "pUkzx"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "FP",
+            "numArcs": 3,
+            "id": "4Q_bf"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 55,
+        "cpv": 42,
+        "name": "A1",
+        "mass": 16,
+        "flawed": false,
+        "class": "Corvette"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g style=\"fill:#030303\" transform=\"matrix(1 0 0 .96594 -107.536 -39.532)\"><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.31818 0 0 .99057 -70.427 -23.906)\"/><rect width=\"17.074\" height=\"62.605\" x=\"229.203\" y=\"153.171\" ry=\"8.537\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><rect width=\"17.074\" height=\"62.605\" x=\"150.286\" y=\"153.171\" ry=\"8.537\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"m155.19 501.791-34.419.505-34.419.504 16.773-30.06 16.773-30.06 17.646 29.556 17.647 29.555z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.33615 0 0 .42683 36.872 -10.12)\"/><rect width=\"22.765\" height=\"108.46\" x=\"186.395\" y=\"106.626\" ry=\"14.79\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g></symbol>",
+      "owner": "Player 1",
+      "position": {
+        "x": 16.578708916496304,
+        "y": 16.091631545840542
+      },
+      "facing": 3,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "FrigateA2",
+      "object": {
+        "hull": {
+          "points": 5,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 6,
+            "advanced": false,
+            "id": "jb-Ue"
+          },
+          {
+            "name": "fireControl",
+            "id": "SEVgE"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "ENNXK"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "sXCcB"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "pUkzx"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "FP",
+            "numArcs": 3,
+            "id": "4Q_bf"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 55,
+        "cpv": 42,
+        "name": "A2",
+        "mass": 16,
+        "flawed": false,
+        "class": "Corvette"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g style=\"fill:#030303\" transform=\"matrix(1 0 0 .96594 -107.536 -39.532)\"><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.31818 0 0 .99057 -70.427 -23.906)\"/><rect width=\"17.074\" height=\"62.605\" x=\"229.203\" y=\"153.171\" ry=\"8.537\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><rect width=\"17.074\" height=\"62.605\" x=\"150.286\" y=\"153.171\" ry=\"8.537\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"m155.19 501.791-34.419.505-34.419.504 16.773-30.06 16.773-30.06 17.646 29.556 17.647 29.555z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.33615 0 0 .42683 36.872 -10.12)\"/><rect width=\"22.765\" height=\"108.46\" x=\"186.395\" y=\"106.626\" ry=\"14.79\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g></symbol>",
+      "owner": "Player 1",
+      "position": {
+        "x": 16.803408397546786,
+        "y": 21.634218745085708
+      },
+      "facing": 3,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "FrigateA3",
+      "object": {
+        "hull": {
+          "points": 5,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 6,
+            "advanced": false,
+            "id": "jb-Ue"
+          },
+          {
+            "name": "fireControl",
+            "id": "SEVgE"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "ENNXK"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "sXCcB"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "pUkzx"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "FP",
+            "numArcs": 3,
+            "id": "4Q_bf"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 55,
+        "cpv": 42,
+        "name": "A3",
+        "mass": 16,
+        "flawed": false,
+        "class": "Corvette"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g style=\"fill:#030303\" transform=\"matrix(1 0 0 .96594 -107.536 -39.532)\"><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.31818 0 0 .99057 -70.427 -23.906)\"/><rect width=\"17.074\" height=\"62.605\" x=\"229.203\" y=\"153.171\" ry=\"8.537\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><rect width=\"17.074\" height=\"62.605\" x=\"150.286\" y=\"153.171\" ry=\"8.537\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"m155.19 501.791-34.419.505-34.419.504 16.773-30.06 16.773-30.06 17.646 29.556 17.647 29.555z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.33615 0 0 .42683 36.872 -10.12)\"/><rect width=\"22.765\" height=\"108.46\" x=\"186.395\" y=\"106.626\" ry=\"14.79\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g></symbol>",
+      "owner": "Player 1",
+      "position": {
+        "x": 16.95320805158044,
+        "y": 26.952106463280394
+      },
+      "facing": 3,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "CruiserB1",
+      "object": {
+        "hull": {
+          "points": 26,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [
+          [
+            5,
+            0
+          ]
+        ],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 4,
+            "advanced": false,
+            "id": "V3EEn"
+          },
+          {
+            "name": "fireControl",
+            "id": "aGa9l"
+          },
+          {
+            "name": "fireControl",
+            "id": "qjP-D"
+          },
+          {
+            "name": "screen",
+            "area": false,
+            "advanced": false,
+            "id": "jOZP_"
+          },
+          {
+            "name": "ftl",
+            "advanced": false,
+            "id": "il46r"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "qWqFr"
+          },
+          {
+            "name": "pds",
+            "id": "jpZ1u"
+          },
+          {
+            "name": "pds",
+            "id": "AuYSB"
+          },
+          {
+            "name": "pds",
+            "id": "JRsmG"
+          },
+          {
+            "name": "pds",
+            "id": "1f4Qj"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "xBY4j"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "76XDy"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "vs5J5"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "wN6mZ"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "SH5Z2"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "6484S"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 300,
+        "cpv": 290,
+        "name": "B1",
+        "mass": 89,
+        "class": "Heavy Cruiser"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g transform=\"matrix(.7784 0 0 .93813 18.543 -17.209)\"><rect width=\"81.504\" height=\"159.167\" x=\"52.985\" y=\"35.07\" rx=\"40.752\" ry=\"11.758\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.60189 0 0 2.27335 -232.193 -148.297)\"/></g><g transform=\"matrix(.90618 0 0 1.10083 10.454 -11.538)\"><rect width=\"146.384\" height=\"35.664\" x=\"16.253\" y=\"-114.179\" ry=\"4.863\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/><g transform=\"translate(-1.473 12.964)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.92708 0 0 1.09226 -445.841 30.043)\"/><rect width=\"34.391\" height=\"90.164\" x=\"6.13\" y=\"-124.919\" ry=\"12.295\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/><rect width=\"17.6\" height=\"127.765\" x=\"14.526\" y=\"16.812\" ry=\"17.423\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g><g transform=\"matrix(-1 0 0 1 180.362 12.964)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.92708 0 0 1.09226 -445.841 30.043)\"/><rect width=\"34.391\" height=\"90.164\" x=\"6.13\" y=\"-124.919\" ry=\"12.295\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/><rect width=\"17.6\" height=\"127.765\" x=\"14.526\" y=\"16.812\" ry=\"17.423\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g></g></symbol>",
+      "owner": "Player 2",
+      "position": {
+        "x": 57.24931498663312,
+        "y": 11.447842270797295
+      },
+      "facing": 9,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "CruiserB2",
+      "object": {
+        "hull": {
+          "points": 26,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [
+          [
+            5,
+            0
+          ]
+        ],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 4,
+            "advanced": false,
+            "id": "V3EEn"
+          },
+          {
+            "name": "fireControl",
+            "id": "aGa9l"
+          },
+          {
+            "name": "fireControl",
+            "id": "qjP-D"
+          },
+          {
+            "name": "screen",
+            "area": false,
+            "advanced": false,
+            "id": "jOZP_"
+          },
+          {
+            "name": "ftl",
+            "advanced": false,
+            "id": "il46r"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "qWqFr"
+          },
+          {
+            "name": "pds",
+            "id": "jpZ1u"
+          },
+          {
+            "name": "pds",
+            "id": "AuYSB"
+          },
+          {
+            "name": "pds",
+            "id": "JRsmG"
+          },
+          {
+            "name": "pds",
+            "id": "1f4Qj"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "xBY4j"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "76XDy"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "vs5J5"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "wN6mZ"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "AP",
+            "numArcs": 3,
+            "id": "SH5Z2"
+          },
+          {
+            "name": "beam",
+            "class": 3,
+            "leftArc": "F",
+            "numArcs": 3,
+            "id": "6484S"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 300,
+        "cpv": 290,
+        "name": "B2",
+        "mass": 89,
+        "class": "Heavy Cruiser"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g transform=\"matrix(.7784 0 0 .93813 18.543 -17.209)\"><rect width=\"81.504\" height=\"159.167\" x=\"52.985\" y=\"35.07\" rx=\"40.752\" ry=\"11.758\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(1.60189 0 0 2.27335 -232.193 -148.297)\"/></g><g transform=\"matrix(.90618 0 0 1.10083 10.454 -11.538)\"><rect width=\"146.384\" height=\"35.664\" x=\"16.253\" y=\"-114.179\" ry=\"4.863\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/><g transform=\"translate(-1.473 12.964)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.92708 0 0 1.09226 -445.841 30.043)\"/><rect width=\"34.391\" height=\"90.164\" x=\"6.13\" y=\"-124.919\" ry=\"12.295\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/><rect width=\"17.6\" height=\"127.765\" x=\"14.526\" y=\"16.812\" ry=\"17.423\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g><g transform=\"matrix(-1 0 0 1 180.362 12.964)\"><path d=\"m506.067 66.378 9.16 15.864 9.158 15.864H487.75l9.159-15.864 9.16-15.864z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.92708 0 0 1.09226 -445.841 30.043)\"/><rect width=\"34.391\" height=\"90.164\" x=\"6.13\" y=\"-124.919\" ry=\"12.295\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(1 -1)\"/><rect width=\"17.6\" height=\"127.765\" x=\"14.526\" y=\"16.812\" ry=\"17.423\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/></g></g></symbol>",
+      "owner": "Player 2",
+      "position": {
+        "x": 57.174415159616295,
+        "y": 32.86919279760969
+      },
+      "facing": 9,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "FrigateB1",
+      "object": {
+        "hull": {
+          "points": 5,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 6,
+            "advanced": false,
+            "id": "jb-Ue"
+          },
+          {
+            "name": "fireControl",
+            "id": "SEVgE"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "ENNXK"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "sXCcB"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "pUkzx"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "FP",
+            "numArcs": 3,
+            "id": "4Q_bf"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 55,
+        "cpv": 42,
+        "name": "B1",
+        "mass": 16,
+        "flawed": false,
+        "class": "Corvette"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g style=\"fill:#030303\" transform=\"translate(-108.52 -231.682)\"><path d=\"M214.797 372.783h43.264l-43.264-52.968v52.968z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dashoffset:0\"/><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.99278 0 0 1.26915 -.273 165.091)\"/><rect width=\"20.561\" height=\"64.057\" x=\"247.521\" y=\"318.494\" ry=\"8.735\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"M188.449 372.723h-43.264l43.264-52.969v52.969z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dashoffset:0\"/><rect width=\"20.561\" height=\"64.057\" x=\"-155.725\" y=\"318.434\" ry=\"8.735\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(-1 1)\"/></g></symbol>",
+      "owner": "Player 2",
+      "position": {
+        "x": 50.433430728101904,
+        "y": 15.417533102689104
+      },
+      "facing": 9,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "FrigateB2",
+      "object": {
+        "hull": {
+          "points": 5,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 6,
+            "advanced": false,
+            "id": "jb-Ue"
+          },
+          {
+            "name": "fireControl",
+            "id": "SEVgE"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "ENNXK"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "sXCcB"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "pUkzx"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "FP",
+            "numArcs": 3,
+            "id": "4Q_bf"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 55,
+        "cpv": 42,
+        "name": "B2",
+        "mass": 16,
+        "flawed": false,
+        "class": "Corvette"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g style=\"fill:#030303\" transform=\"translate(-108.52 -231.682)\"><path d=\"M214.797 372.783h43.264l-43.264-52.968v52.968z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dashoffset:0\"/><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.99278 0 0 1.26915 -.273 165.091)\"/><rect width=\"20.561\" height=\"64.057\" x=\"247.521\" y=\"318.494\" ry=\"8.735\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"M188.449 372.723h-43.264l43.264-52.969v52.969z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dashoffset:0\"/><rect width=\"20.561\" height=\"64.057\" x=\"-155.725\" y=\"318.434\" ry=\"8.735\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(-1 1)\"/></g></symbol>",
+      "owner": "Player 2",
+      "position": {
+        "x": 50.73303003616921,
+        "y": 21.409519264035225
+      },
+      "facing": 9,
+      "speed": 0,
+      "movementMode": "cinematic"
+    },
+    {
+      "name": "placeShip",
+      "id": "FrigateB3",
+      "object": {
+        "hull": {
+          "points": 5,
+          "rows": 4,
+          "stealth": "0",
+          "streamlining": "none"
+        },
+        "armour": [],
+        "systems": [
+          {
+            "name": "drive",
+            "thrust": 6,
+            "advanced": false,
+            "id": "jb-Ue"
+          },
+          {
+            "name": "fireControl",
+            "id": "SEVgE"
+          }
+        ],
+        "weapons": [
+          {
+            "name": "pds",
+            "id": "ENNXK"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "sXCcB"
+          },
+          {
+            "name": "beam",
+            "class": 1,
+            "leftArc": "F",
+            "numArcs": 6,
+            "id": "pUkzx"
+          },
+          {
+            "name": "beam",
+            "class": 2,
+            "leftArc": "FP",
+            "numArcs": 3,
+            "id": "4Q_bf"
+          }
+        ],
+        "ordnance": [],
+        "extras": {},
+        "fighters": [],
+        "layout": {},
+        "orientation": "alpha",
+        "points": 55,
+        "cpv": 42,
+        "name": "B3",
+        "mass": 16,
+        "flawed": false,
+        "class": "Corvette"
+      },
+      "svg": "<symbol viewBox=\"0 0 180 180\"><g style=\"fill:#030303\" transform=\"translate(-108.52 -231.682)\"><path d=\"M214.797 372.783h43.264l-43.264-52.968v52.968z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dashoffset:0\"/><path d=\"M234.768 115.667c0 20.824-14.014 37.705-31.302 37.705s-31.303-16.881-31.303-37.705c0-20.824 14.015-37.705 31.303-37.705s31.302 16.88 31.302 37.705z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"matrix(.99278 0 0 1.26915 -.273 165.091)\"/><rect width=\"20.561\" height=\"64.057\" x=\"247.521\" y=\"318.494\" ry=\"8.735\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\"/><path d=\"M188.449 372.723h-43.264l43.264-52.969v52.969z\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dashoffset:0\"/><rect width=\"20.561\" height=\"64.057\" x=\"-155.725\" y=\"318.434\" ry=\"8.735\" style=\"fill:#030303;fill-opacity:1;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0\" transform=\"scale(-1 1)\"/></g></symbol>",
+      "owner": "Player 2",
+      "position": {
+        "x": 51.10752917125335,
+        "y": 26.877206636263562
+      },
+      "facing": 9,
+      "speed": 0,
+      "movementMode": "cinematic"
+    }
+  ]
+}

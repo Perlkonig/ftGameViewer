@@ -1,0 +1,786 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "https://www.abstractplay.com/schemas/fullthrust/game/objects/1-0-0.json#",
+    "title": "Full Thrust Game Objects",
+    "description": "Definitions of possible on-screen game objects",
+    "type": "object",
+    "oneOf": [
+        {
+            "description": "Describes all ship objects",
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["ship"]
+                },
+                "id": {
+                    "description": "Every object requires a universally unique ID.",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "The name of the owning player. The corresponding player object must already be defined.",
+                    "type": "string"
+                },
+                "object": {
+                    "description": "The content of the ship, as defined by the ftLibShip schema.",
+                    "$ref": "../../node_modules/ftlibship/dist/schemas/ship.json"
+                },
+                "svg": {
+                    "description": "The SVG code for this ship. It must be a <symbol> tag with a `viewBox` attribute. The image must be oriented such that the front of the ship is at the top of the image. Anything with a fill colour of '#030303' will be replaced by the assigned player's colour.",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Either valid x,y coordinates or `null` if the object is cloaked or otherwise invisible",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/position"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "course": {
+                    "description": "Expressed as degrees (0 = starboard, CCW). Required for vector movement ships.",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "movementMode": {
+                    "description": "Movement system for this ship. Fixed at placement; cannot change later.",
+                    "enum": ["cinematic", "vector"],
+                    "default": "cinematic"
+                },
+                "speed": {
+                    "description": "Current speed",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "vectors": {
+                    "description": "A list of movement vectors, usually rendered by drawing lines on the map. The first entry is the most recent and should be rendered most prominently. Each vector is itself an array of one or more points in the movement (showing course changes and the like).",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/position"
+                        },
+                        "minItems": 2
+                    }
+                },
+                "systems": {
+                    "description": "Lists any damaged/repaired systems. A system not listed here is considered pristine.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The uid of the system",
+                                "type": "string"
+                            },
+                            "state": {
+                                "description": "Typical interpretation is this: damaged systems can be repaired, destroyed systems can't be repaired, and repaired systems cannot be damaged, only destroyed.",
+                                "enum": ["damaged", "repaired", "destroyed"]
+                            }
+                        },
+                        "required": ["id", "state"]
+                    }
+                },
+                "coreState": {
+                    "description": "Core systems are not a normal system. They must be recorded separately.",
+                    "type": "object",
+                    "properties": {
+                        "powerless": {
+                            "description": "If this propery exists, then the power core has been damaged. It's a simple boolean. It's either damaged or not.",
+                            "type": "boolean",
+                            "default": true
+                        },
+                        "lifeless": {
+                            "description": "Life support will fail once the given number of turns passes.",
+                            "type": "integer"
+                        },
+                        "uncontrolled": {
+                            "description": "No control of the ship for the given number of turns.",
+                            "type": "integer"
+                        },
+                        "dumped": {
+                            "description": "Reactor was dumped; ship is powerless but no longer rolls for explosion.",
+                            "type": "boolean"
+                        },
+                        "abandonedSinceTurn": {
+                            "description": "Turn when crew abandoned ship; lowers reactor explosion threshold each phase 15.",
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                },
+                "dmgHull": {
+                    "description": "Records how much total hull damage has been done",
+                    "type": "integer"
+                },
+                "dmgArmour": {
+                    "description": "Records how much damage has been done to each row of armour. The first element is the inner-most armour layer.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "standard": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 0
+                            },
+                            "regenerative": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 0
+                            },
+                            "regenerativeLost": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "default": 0,
+                                "description": "Permanently lost regenerative armour boxes on this row."
+                            }
+                        }
+                    }
+                },
+                "ammo": {
+                    "description": "Used to track ammo usage throughout the game (ordnance). Every time ammunition is consumed, insert the system id into this array. Each occurrence will reduce 1 from the SSD. For whole systems (like rocket pods), just mark the system as 'destroyed.'",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "boarders": {
+                    "description": "Enemy boarding units aboard this ship (game-time state; rendered via RenderOpts.invaders).",
+                    "type": "object",
+                    "properties": {
+                        "units": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": { "type": "string" },
+                                    "type": { "enum": ["dcp", "marine"] },
+                                    "owner": {
+                                        "description": "Attacking player id",
+                                        "type": "string"
+                                    },
+                                    "fromShip": {
+                                        "description": "Friendly ship crew departed from",
+                                        "type": "string"
+                                    },
+                                    "boardedTurn": { "type": "integer" },
+                                    "allocation": { "enum": ["kill", "raze"] },
+                                    "sourceMarineId": { "type": "string" },
+                                    "sourceDcpId": { "type": "string" },
+                                    "sourceBuiltinDcp": { "type": "boolean" }
+                                },
+                                "required": ["id", "type", "owner"]
+                            }
+                        }
+                    },
+                    "required": ["units"]
+                },
+                "boardingCapture": {
+                    "description": "Ship captured by boarding (hull depleted by raze); exempt from phase 11 hull cleanup until ownership is transferred.",
+                    "type": "object",
+                    "properties": {
+                        "by": {
+                            "description": "Capturing player id",
+                            "type": "string"
+                        },
+                        "turn": { "type": "integer" },
+                        "resolved": {
+                            "description": "True after moderator transfers ownership via setShipOwner",
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["by"],
+                    "additionalProperties": false
+                },
+                "pendingThreshold": {
+                    "description": "Hull row threshold check pending resolution in phase 13.",
+                    "type": "object",
+                    "properties": {
+                        "failOnOrAbove": { "type": "integer", "minimum": 1, "maximum": 6 },
+                        "rollBonus": { "type": "integer", "minimum": 0 },
+                        "thresholdIndex": { "type": "integer", "minimum": 1 },
+                        "crossedRows": { "type": "integer", "minimum": 1 }
+                    },
+                    "required": ["failOnOrAbove", "rollBonus", "thresholdIndex", "crossedRows"],
+                    "additionalProperties": false
+                },
+                "thresholdRowsResolved": {
+                    "description": "Highest hull threshold row index already resolved this game.",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "empHullRowDrm": {
+                    "description": "Hull rows crossed in phases 11–12; adds +1 DRM per row to EMP threshold rolls in phase 13.",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "pendingThresholds": {
+                    "description": "Queued hull threshold checks pending resolution in phase 13.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "failOnOrAbove": { "type": "integer", "minimum": 1, "maximum": 6 },
+                            "rollBonus": { "type": "integer", "minimum": 0 },
+                            "thresholdIndex": { "type": "integer", "minimum": 1 },
+                            "crossedRows": { "type": "integer", "minimum": 1 }
+                        },
+                        "required": ["failOnOrAbove", "rollBonus", "thresholdIndex", "crossedRows"],
+                        "additionalProperties": false
+                    }
+                },
+                "movementFlags": {
+                    "description": "Flags set when movement resolves in phase 5 (cleared on turn wrap).",
+                    "type": "object",
+                    "properties": {
+                        "sweepForMines": { "type": "boolean" }
+                    },
+                    "additionalProperties": false
+                },
+                "crewDeployment": {
+                    "description": "Friendly marines and DCP absent from this ship (sent on boarding missions).",
+                    "type": "object",
+                    "properties": {
+                        "deployed": {
+                            "description": "Absent hired marines and damageControl system ids.",
+                            "type": "array",
+                            "items": { "type": "string" }
+                        },
+                        "deployedBuiltinDcp": {
+                            "description": "Built-in hull-star DCP parties away from this ship.",
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "hangars": {
+                    "description": "Per-hangar runtime occupancy. null = deployed/empty bay.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "oneOf": [
+                            { "type": "null" },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "type": { "type": "string" },
+                                    "number": { "type": "integer", "minimum": 0 },
+                                    "skill": {
+                                        "enum": ["standard", "ace", "turkey"]
+                                    },
+                                    "mods": {
+                                        "type": "array",
+                                        "items": { "type": "string" }
+                                    },
+                                    "weaponMode": {
+                                        "enum": ["beam", "cannon"]
+                                    },
+                                    "enduranceMax": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    }
+                                },
+                                "required": ["type"]
+                            }
+                        ]
+                    }
+                },
+                "gunboatRacks": {
+                    "description": "Per gunboatRack runtime occupancy. null = deployed/empty rack.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "oneOf": [
+                            { "type": "null" },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "squadron": { "type": "string" },
+                                    "boats": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": { "type": "string" },
+                                                "id": { "type": "string" }
+                                            },
+                                            "required": ["type"]
+                                        }
+                                    },
+                                    "endurance": { "type": "integer", "minimum": 0, "maximum": 6 }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "boatBays": {
+                    "description": "Per boat-bay gunboat squadron storage. null = empty.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "oneOf": [
+                            { "type": "null" },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "squadron": { "type": "string" },
+                                    "boats": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": { "type": "string" },
+                                                "id": { "type": "string" }
+                                            },
+                                            "required": ["type"]
+                                        }
+                                    },
+                                    "endurance": { "type": "integer", "minimum": 0, "maximum": 6 }
+                                },
+                                "required": ["squadron"]
+                            }
+                        ]
+                    }
+                },
+                "fighterEngagements": {
+                    "description": "Fighter groups that attacked or are allocated against this ship (phase 7+).",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "groupId": { "type": "string" },
+                            "turn": { "type": "integer" },
+                            "kind": { "enum": ["attack"], "default": "attack" }
+                        },
+                        "required": ["groupId", "turn"]
+                    }
+                },
+                "pblFiredTurn": {
+                    "description": "Turn when each PBL system last fired (every-other-turn rule).",
+                    "type": "object",
+                    "additionalProperties": { "type": "integer" }
+                }
+            },
+            "required": ["objType", "id", "object", "svg", "owner", "position", "facing", "speed"]
+        },
+        {
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["fighters"]
+                },
+                "id": {
+                    "description": "Every object must have a unique ID.",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "The id of the owning player. The player must be defined.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Fighter wing type (ftlibship FighterType). multiRole awaits moderator setFighterType.",
+                    "type": "string"
+                },
+                "mods": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "weaponMode": {
+                    "enum": ["beam", "cannon"]
+                },
+                "enduranceMax": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "position": {
+                    "description": "Either a 'position' if launched, or a hangar id if docked.",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/hangar"
+                        },
+                        {
+                            "$ref": "#/$defs/position"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "vectors": {
+                    "description": "A list of movement vectors, usually rendered by drawing lines on the map. The first entry is the most recent and should be rendered most prominently. Each vector is itself an array of one or more points in the movement (showing course changes and the like).",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/position"
+                        },
+                        "minItems": 2
+                    }
+                },
+                "number": {
+                    "description": "The number of surviving fighters in the squadron",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "endurance": {
+                    "description": "The squad's endurance, which is reset when recovered.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "skill": {
+                    "description": "Only needed if you are playing with ace/turkey rules",
+                    "enum": ["standard", "ace", "turkey"],
+                    "default": "standard"
+                },
+                "svg": {
+                    "description": "ftLibShip fighter triangle symbol for map rendering.",
+                    "type": "string"
+                },
+                "callsign": {
+                    "description": "Player-facing wing name. Persists when docked; moderators may change via setFighterCallsign.",
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "fighterAttachment": {
+                    "description": "Screening or pursuit link to another map object. Cleared on normal move or recovery.",
+                    "type": "object",
+                    "properties": {
+                        "kind": { "enum": ["screen", "pursue"] },
+                        "targetType": { "enum": ["ship", "fighters"] },
+                        "targetId": { "type": "string" },
+                        "offset": {
+                            "description": "Fighter position relative to target in target body frame (dx along facing, dy to starboard), MU.",
+                            "type": "object",
+                            "properties": {
+                                "dx": { "type": "number" },
+                                "dy": { "type": "number" }
+                            },
+                            "required": ["dx", "dy"]
+                        },
+                        "screenFacing": {
+                            "description": "Screening only: chosen facing preserved when the escorted unit moves.",
+                            "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                        }
+                    },
+                    "required": ["kind", "targetType", "targetId", "offset"],
+                    "additionalProperties": false
+                },
+                "lastAttack": {
+                    "description": "Last turn this group attacked a target (set in phase 7+). Used for pursuit eligibility.",
+                    "type": "object",
+                    "properties": {
+                        "turn": { "type": "integer" },
+                        "targetType": { "enum": ["ship", "fighters", "ordnance"] },
+                        "targetId": { "type": "string" }
+                    },
+                    "required": ["turn", "targetType", "targetId"],
+                    "additionalProperties": false
+                },
+                "attackAllocation": {
+                    "description": "Phase 7 fighter attack target for the current turn.",
+                    "type": "object",
+                    "properties": {
+                        "turn": { "type": "integer" },
+                        "targetType": { "enum": ["ship", "fighters", "ordnance"] },
+                        "targetId": { "type": "string" }
+                    },
+                    "required": ["turn", "targetType", "targetId"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["objType", "id", "owner", "type", "number", "endurance", "skill"]
+        },
+        {
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["gunboats"]
+                },
+                "id": { "type": "string" },
+                "owner": { "type": "string" },
+                "squadronKey": {
+                    "description": "Design squadron key (rack id or FTL squadron id).",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Display label for squadron (e.g. beam, mixed).",
+                    "type": "string"
+                },
+                "position": {
+                    "oneOf": [
+                        { "$ref": "#/$defs/gunboatRack" },
+                        { "$ref": "#/$defs/gunboatBay" },
+                        { "$ref": "#/$defs/position" }
+                    ]
+                },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "vectors": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": { "$ref": "#/$defs/position" },
+                        "minItems": 2
+                    }
+                },
+                "number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "endurance": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "skill": {
+                    "enum": ["standard", "ace", "turkey"],
+                    "default": "standard"
+                },
+                "boats": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": { "type": "string" },
+                            "id": { "type": "string" }
+                        },
+                        "required": ["type"]
+                    }
+                },
+                "protection": { "enum": ["heavy", "screened"] },
+                "ecm": { "type": "integer", "minimum": 0 },
+                "ftl": { "type": "boolean" },
+                "svg": { "type": "string" },
+                "callsign": { "type": "string", "maxLength": 32 },
+                "gunboatAttachment": {
+                    "type": "object",
+                    "properties": {
+                        "kind": { "enum": ["screen", "pursue"] },
+                        "targetType": { "enum": ["ship", "fighters", "gunboats"] },
+                        "targetId": { "type": "string" },
+                        "offset": {
+                            "type": "object",
+                            "properties": {
+                                "dx": { "type": "number" },
+                                "dy": { "type": "number" }
+                            },
+                            "required": ["dx", "dy"]
+                        },
+                        "screenFacing": {
+                            "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                        }
+                    },
+                    "required": ["kind", "targetType", "targetId", "offset"],
+                    "additionalProperties": false
+                },
+                "lastAttack": {
+                    "type": "object",
+                    "properties": {
+                        "turn": { "type": "integer" },
+                        "targetType": { "enum": ["ship", "fighters", "gunboats", "ordnance"] },
+                        "targetId": { "type": "string" }
+                    },
+                    "required": ["turn", "targetType", "targetId"],
+                    "additionalProperties": false
+                },
+                "attackAllocation": {
+                    "type": "object",
+                    "properties": {
+                        "turn": { "type": "integer" },
+                        "targetType": { "enum": ["ship", "fighters", "gunboats", "ordnance"] },
+                        "targetId": { "type": "string" }
+                    },
+                    "required": ["turn", "targetType", "targetId"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["objType", "id", "owner", "squadronKey", "type", "number", "endurance", "skill"]
+        },
+        {
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["ordnance"]
+                },
+                "id": {
+                    "description": "Every object needs a universally unique identifier",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "If provided, the device will be marked as owned by that player colour and will theoretically not target friendly ships",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "These are the built-in ordnance types, with an option for custom types",
+                    "enum": ["missile", "amt", "salvo", "salvoER", "salvoMS", "plasmaBolt", "mine", "rocket", "_other"]
+                },
+                "silhouette": {
+                    "description": "If `type` is `_other`, then you can provide an SVG silhouette here, otherwise a generic marker will be used. The SVG must be a `<symbol>` tag with a `viewBox` attribute and an `id` attribute of the id provided above.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/$defs/position"
+                },
+                "range": {
+                    "description": "If given, hints to the renderer what to display if the object is clicked. Usually used to show a homing or explosion range. Expressed in MUs.",
+                    "type": "number"
+                },
+                "deployedTurn": {
+                    "description": "Game turn when mine was laid. Inactive until a later turn.",
+                    "type": "integer"
+                },
+                "beamClass": {
+                    "description": "Beam class for mine detonation damage (default 1).",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                },
+                "svg": {
+                    "description": "ftLibShip launcher glyph for map rendering.",
+                    "type": "string"
+                },
+                "facing": {
+                    "description": "Clock facing (multistage stage-1 markers).",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "stage": {
+                    "description": "Multistage missile progress.",
+                    "enum": [1, 2]
+                },
+                "aimPosition": {
+                    "$ref": "#/$defs/position"
+                },
+                "launcherShip": {
+                    "type": "string"
+                },
+                "systemId": {
+                    "type": "string"
+                },
+                "targetShip": {
+                    "description": "Homing ordnance or rocket pod target ship id.",
+                    "type": "string"
+                },
+                "detonateOpenSpace": {
+                    "description": "AMT: explode in open space at end of movement (skip homing allocation).",
+                    "type": "boolean"
+                },
+                "interceptHits": {
+                    "description": "Accumulated fighter intercept hits (AMT/PBL).",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "amtWarheadStrength": {
+                    "description": "AMT warhead strength dice (degrades on intercept hits).",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "amtBlastRadius": {
+                    "description": "AMT blast radius in MU (degrades on intercept hits).",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "salvoCount": {
+                    "description": "Missiles remaining in a salvo marker (starts at 6 when launched).",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                }
+            },
+            "required": ["objType", "id", "type", "position"]
+        },
+        {
+            "description": "Used to describe any other movable or destructible element on the board not owned by a player (e.g., asteroids).",
+            "type": "object",
+            "properties": {
+                "objType": {
+                    "enum": ["other"]
+                },
+                "id": {
+                    "description": "Every object needs a universally unique identifier",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "There are built-in types, but custom ones are permitted as well.",
+                    "enum": ["asteroid", "debris", "_other"]
+                },
+                "silhouette": {
+                    "description": "If `type` is `_other`, then you can provide an SVG silhouette here, otherwise a generic marker will be used. The SVG must be a `<symbol>` tag with a `viewBox` attribute and an `id` attribute of the id provided above.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/$defs/position"
+                },
+                "course": {
+                    "description": "These objects can be made to move in an arbitrary direction. Given as degrees",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "speed": {
+                    "description": "Speed of movement in MUs/turn",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": ["objType", "id", "type", "position"]
+        }
+    ],
+    "$defs": {
+        "hangar": {
+            "type": "object",
+            "properties": {
+                "ship": {
+                    "description": "The uuid of the ship the squadron is housed in.",
+                    "type": "string"
+                },
+                "hangar": {
+                    "description": "The uid of the hangar on that ship where the squadron is housed.",
+                    "type": "string"
+                }
+            },
+            "required": ["ship", "hangar"]
+        },
+        "gunboatRack": {
+            "type": "object",
+            "properties": {
+                "ship": { "type": "string" },
+                "rack": { "type": "string" }
+            },
+            "required": ["ship", "rack"]
+        },
+        "gunboatBay": {
+            "type": "object",
+            "properties": {
+                "ship": { "type": "string" },
+                "bay": { "type": "string" }
+            },
+            "required": ["ship", "bay"]
+        },
+        "position": {
+            "description": "Generic x,y coordinate object. All units are in MUs relative to 0,0.",
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y"],
+            "additionalProperties": false
+        }
+    }
+}

@@ -1,0 +1,24 @@
+---
+description: Svelte/HTML markup — do not use motion.* pseudo-components
+alwaysApply: true
+---
+
+# Svelte markup: no `motion.*` tags
+
+This project uses **Svelte**, not React/Framer Motion. Never emit markup like `<motion.div>`, `<motion.span>`, or any other `motion.*` element — not even briefly in a patch. Use Bulma `notification`, `box`, or plain HTML elements for layout.
+
+Use normal HTML elements instead:
+
+```svelte
+<!-- BAD -->
+<motion.div class="column">...</motion.div>
+
+<!-- GOOD -->
+<div class="column">...</div>
+```
+
+Legitimate uses of the word "motion" in this codebase are unrelated (e.g. `import { tweened } from "svelte/motion"`, `motionLine` data fields). Do not confuse those with JSX-style `motion` component tags.
+
+## Enforcement
+
+`npm run lint:markup` scans `src/**/*.svelte` and fails on `<motion.*>` or `</motion.*>`. It runs as part of `npm run check`. After editing any `.svelte` file, run `npm run lint:markup` before finishing.

@@ -1,0 +1,1718 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "https://www.abstractplay.com/schemas/fullthrust/game/commands/1-0-0.json#",
+    "title": "Full Thrust Game Command",
+    "description": "Definitions of possible commands that change game state",
+    "type": "object",
+    "oneOf": [
+        {
+            "description": "Places a new, pristine ship on the board. If the scenario calls for a less-than-pristine state, then issue whatever commands are necessary to bring the ship to that state. Do not use this for uncloaking a ship! Just issue a `moveShip` order with visible `position` coordinates.",
+            "properties": {
+                "name": {
+                    "enum": ["placeShip"]
+                },
+                "id": {
+                    "description": "The uuid of the ship.",
+                    "type": "string"
+                },
+                "object": {
+                    "description": "The content of the ship, as defined by the ftLibShip schema.",
+                    "$ref": "../../node_modules/ftlibship/dist/schemas/ship.json"
+                },
+                "svg": {
+                    "description": "The SVG code for this ship. It must be a <symbol> tag with a `viewBox` attribute. The image must be oriented such that the front of the ship is at the top of the image. Anything with a fill colour of '#030303' will be replaced by the assigned player's colour.",
+                    "type": "string"
+                },
+                "owner": {
+                    "description": "The name of the owning player. The corresponding player object must already be defined.",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Either valid x,y coordinates or `null` if the object is cloaked or otherwise invisible",
+                    "oneOf": [
+                        {
+                            "$ref": "objects.json#/$defs/position"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "course": {
+                    "description": "Expressed as degrees (0 = starboard, CCW). Required when movementMode is vector.",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "movementMode": {
+                    "description": "Movement system for this ship. Fixed at placement.",
+                    "enum": ["cinematic", "vector"]
+                },
+                "speed": {
+                    "description": "Current speed",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "deployedSquadrons": {
+                    "description": "FTL wings/gunboats placed on map with the ship (hyperspace entry).",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "objType": { "enum": ["fighters", "gunboats"] },
+                            "id": { "type": "string" },
+                            "position": { "$ref": "objects.json#/$defs/position" },
+                            "endurance": { "type": "integer", "minimum": 0, "maximum": 6 },
+                            "facing": {
+                                "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                            },
+                            "callsign": {
+                                "type": "string",
+                                "maxLength": 32
+                            }
+                        },
+                        "required": ["objType", "id", "position"]
+                    }
+                }
+            },
+            "required": ["name", "id", "object", "svg", "owner", "position", "facing", "speed"]
+        },
+        {
+            "description": "Movement command. Phase 1 orders store deltas only (cinematic allocation or vector maneuvers) and resolve in phase 5 from the ship's position at resolution. Ships without orders still drift at current speed.",
+            "properties": {
+                "name": {
+                    "enum": ["moveShip"]
+                },
+                "id": {
+                    "description": "The uuid of the ship.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "course": {
+                    "description": "Expressed as degrees (0 = starboard, CCW). Set for vector ships.",
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 360
+                },
+                "movementMode": {
+                    "description": "Movement system chosen at placement.",
+                    "enum": ["cinematic", "vector"]
+                },
+                "speed": {
+                    "description": "Current speed",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "cinematicAllocation": {
+                    "description": "Cinematic thrust/turn allocation (delta). Resolved from ship state in phase 5.",
+                    "type": "object",
+                    "properties": {
+                        "speedChange": {
+                            "enum": ["hold", "accel", "decel"]
+                        },
+                        "speedChangeThrust": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "turns": {
+                            "type": "number"
+                        }
+                    },
+                    "required": ["speedChange", "speedChangeThrust", "turns"],
+                    "additionalProperties": false
+                },
+                "advancedDrives": {
+                    "description": "Whether advanced drives apply to this cinematic allocation.",
+                    "type": "boolean"
+                },
+                "vectorManeuvers": {
+                    "description": "Ordered vector maneuvers for this move (rotate, push, mainDrive).",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "oneOf": [
+                            {
+                                "properties": {
+                                    "type": { "enum": ["rotate"] },
+                                    "turns": {
+                                        "description": "Clock-face turns (+ starboard).",
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": ["type", "turns"],
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": { "enum": ["push"] },
+                                    "direction": {
+                                        "enum": ["port", "starboard", "reverse"]
+                                    },
+                                    "distance": {
+                                        "type": "number",
+                                        "minimum": 0
+                                    }
+                                },
+                                "required": ["type", "direction", "distance"],
+                                "additionalProperties": false
+                            },
+                            {
+                                "properties": {
+                                    "type": { "enum": ["mainDrive"] },
+                                    "thrust": {
+                                        "type": "number",
+                                        "minimum": 0
+                                    }
+                                },
+                                "required": ["type", "thrust"],
+                                "additionalProperties": false
+                            }
+                        ]
+                    }
+                },
+                "vectors": {
+                    "description": "A list of movement vectors involved in this command. This will be simply added to the existing array.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "objects.json#/$defs/position"
+                    },
+                    "minItems": 2
+                },
+                "sweepForMines": {
+                    "description": "Activate minesweeper this turn (phase 1 order).",
+                    "type": "boolean"
+                },
+                "deployMineLayers": {
+                    "description": "mineLayer system ids that will deploy a mine when movement resolves in phase 5.",
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "launchFighters": {
+                    "description": "Declare intent to launch fighters in phase 3. When set, movement may not use thrust.",
+                    "type": "boolean"
+                }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Lays a mine",
+            "properties": {
+                "name": {
+                    "enum": ["layMine"]
+                },
+                "ship": {
+                    "description": "The uuid of the ship laying the mine.",
+                    "type": "string"
+                },
+                "systemId": {
+                    "description": "The mineLayer system id deploying this mine.",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Point on the ship's movement path where the mine is placed.",
+                    "$ref": "objects.json#/$defs/position"
+                },
+                "id": {
+                    "description": "Stable uuid for the mine ordnance object when movement resolves.",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "ship", "systemId", "position"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Launches ordnance",
+            "properties": {
+                "name": {
+                    "enum": ["launchOrdnance"]
+                },
+                "ship": {
+                    "description": "The uuid of the launching ship.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "The uuid of the new ordnance object on the board.",
+                    "type": "string"
+                },
+                "systemId": {
+                    "description": "The uuid of the system being triggered. This is what determines the icon to display.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                },
+                "type": {
+                    "description": "Ordnance type to place on the board.",
+                    "enum": ["missile", "amt", "salvo", "salvoER", "salvoMS", "plasmaBolt", "mine", "rocket", "_other"]
+                },
+                "range": {
+                    "description": "Optional display range in MUs (homing/explosion hint).",
+                    "type": "number"
+                },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "stage": { "enum": [1, 2] },
+                "aimPosition": { "$ref": "objects.json#/$defs/position" },
+                "targetShip": { "type": "string" },
+                "deployedTurn": { "type": "integer" },
+                "detonateOpenSpace": {
+                    "description": "AMT: explode in open space (skip phase 7 homing).",
+                    "type": "boolean"
+                }
+            },
+            "required": ["name", "ship", "id", "systemId", "position", "type"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Move ordnance; phase 3 (multistage) or phase 7",
+            "properties": {
+                "name": {
+                    "enum": ["moveOrdnance"]
+                },
+                "id": {
+                    "description": "Uuid of ordnance object",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                },
+                "stage": { "enum": [2] },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                }
+            },
+            "required": ["name", "id", "position"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Records the use of a single 'charge' of ammunition. The `launchOrdnance` command does this automatically. You shouldn't need this most of the time.",
+            "properties": {
+                "name": {
+                    "enum": ["useAmmo"]
+                },
+                "ship": {
+                    "description": "Uuid of the ship",
+                    "type": "string"
+                },
+                "systemId": {
+                    "description": "Uuid of the launching system",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "ship", "systemId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Launches fighters",
+            "properties": {
+                "name": {
+                    "enum": ["launchFighters"]
+                },
+                "ship": {
+                    "description": "The uuid of the launching ship.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "The uuid of the fighter squadron being launched.",
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "objects.json#/$defs/position"
+                },
+                "hangarId": {
+                    "description": "Hangar system id the wing launches from.",
+                    "type": "string"
+                },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "callsign": {
+                    "description": "Optional wing name; applied only if the group has no callsign yet.",
+                    "type": "string",
+                    "maxLength": 32
+                }
+            },
+            "required": ["name", "ship", "id", "position", "hangarId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Moving fighters. Just enter the changed information. Vectors are additive.",
+            "properties": {
+                "name": {
+                    "enum": ["moveFighters"]
+                },
+                "id": {
+                    "description": "Uuid of the fighter group",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "Either a 'position' if launched, or a hangar id if docked.",
+                    "oneOf": [
+                        {
+                            "$ref": "objects.json#/$defs/hangar"
+                        },
+                        {
+                            "$ref": "objects.json#/$defs/position"
+                        }
+                    ]
+                },
+                "facing": {
+                    "description": "Expressed as a clock facing.",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "vectors": {
+                    "description": "A list of movement vectors. Added to the existing vector array.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "objects.json#/$defs/position"
+                    },
+                    "minItems": 2
+                },
+                "distanceMu": {
+                    "description": "Distance moved in MU (recorded on issue).",
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": ["name", "id", "position", "distanceMu"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare a fighter group is screening a friendly ship or fighter group (phase 4/6).",
+            "properties": {
+                "name": { "enum": ["screenFighters"] },
+                "id": { "type": "string" },
+                "facing": {
+                    "description": "Clock facing while screening (default: current group facing).",
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "ship": {
+                    "type": "string",
+                    "description": "Legacy: friendly ship id (use targetType/targetId for fighter groups)"
+                },
+                "targetType": { "enum": ["ship", "fighters"] },
+                "targetId": { "type": "string" }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare a fighter group is pursuing an enemy target (phase 4).",
+            "properties": {
+                "name": { "enum": ["pursueFighters"] },
+                "id": { "type": "string" },
+                "targetType": { "enum": ["ship", "fighters"] },
+                "targetId": { "type": "string" }
+            },
+            "required": ["name", "id", "targetType", "targetId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Adjust non-positional fighter stats. Provide the changed values.",
+            "properties": {
+                "name": {
+                    "enum": ["adjustFighters"]
+                },
+                "id": {
+                    "description": "Uuid of the fighter group",
+                    "type": "string"
+                },
+                "number": {
+                    "description": "The number of surviving fighters in the squadron",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "endurance": {
+                    "description": "The squad's endurance, which is reset when recovered.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 6
+                },
+                "skill": {
+                    "description": "Only needed if you are playing with ace/turkey rules",
+                    "enum": ["standard", "ace", "turkey"],
+                    "default": "standard"
+                }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Launches a gunboat squadron from a rack or boat bay.",
+            "properties": {
+                "name": { "enum": ["launchGunboats"] },
+                "ship": { "type": "string" },
+                "id": { "type": "string" },
+                "position": { "$ref": "objects.json#/$defs/position" },
+                "source": { "enum": ["rack", "bay"] },
+                "rackId": { "type": "string" },
+                "bayId": { "type": "string" },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "callsign": { "type": "string", "maxLength": 32 }
+            },
+            "required": ["name", "ship", "id", "position", "source"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Moving gunboat squadrons.",
+            "properties": {
+                "name": { "enum": ["moveGunboats"] },
+                "id": { "type": "string" },
+                "position": {
+                    "oneOf": [
+                        { "$ref": "objects.json#/$defs/gunboatRack" },
+                        { "$ref": "objects.json#/$defs/gunboatBay" },
+                        { "$ref": "objects.json#/$defs/position" }
+                    ]
+                },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "vectors": {
+                    "type": "array",
+                    "items": { "$ref": "objects.json#/$defs/position" },
+                    "minItems": 2
+                },
+                "distanceMu": { "type": "number", "minimum": 0 },
+                "recoverEndurance": {
+                    "description": "When docking in boat bay, set squad endurance after recover (typically 6).",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                }
+            },
+            "required": ["name", "id", "position", "distanceMu"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Gunboat screening (phase 4/6).",
+            "properties": {
+                "name": { "enum": ["screenGunboats"] },
+                "id": { "type": "string" },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                "targetType": { "enum": ["ship", "fighters", "gunboats"] },
+                "targetId": { "type": "string" }
+            },
+            "required": ["name", "id", "targetType", "targetId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Gunboat pursuit (phase 4).",
+            "properties": {
+                "name": { "enum": ["pursueGunboats"] },
+                "id": { "type": "string" },
+                "targetType": { "enum": ["ship", "fighters", "gunboats"] },
+                "targetId": { "type": "string" }
+            },
+            "required": ["name", "id", "targetType", "targetId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Adjust gunboat squadron stats.",
+            "properties": {
+                "name": { "enum": ["adjustGunboats"] },
+                "id": { "type": "string" },
+                "number": { "type": "integer", "minimum": 0 },
+                "endurance": { "type": "integer", "minimum": 0 },
+                "skill": { "enum": ["standard", "ace", "turkey"] },
+                "boats": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": { "type": "string" },
+                            "id": { "type": "string" }
+                        },
+                        "required": ["type"]
+                    }
+                }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Phase 7 gunboat attack allocation.",
+            "properties": {
+                "name": { "enum": ["declareGunboatAttack"] },
+                "id": { "type": "string" },
+                "targetType": { "enum": ["ship", "fighters", "gunboats", "ordnance"] },
+                "targetId": { "type": "string" }
+            },
+            "required": ["name", "id", "targetType", "targetId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Set gunboat squadron callsign.",
+            "properties": {
+                "name": { "enum": ["setGunboatCallsign"] },
+                "id": { "type": "string" },
+                "callsign": { "type": "string", "maxLength": 32 }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Launch ordnance from gunboats (phase 3).",
+            "properties": {
+                "name": { "enum": ["launchGunboatOrdnance"] },
+                "id": { "type": "string" },
+                "ordnanceType": { "type": "string" },
+                "count": { "type": "integer", "minimum": 1 },
+                "targetId": { "type": "string" },
+                "position": { "$ref": "objects.json#/$defs/position" },
+                "facing": {
+                    "enum": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Fire a weapon at a target. Optional rolls make replay deterministic without re-rolling.",
+            "properties": {
+                "name": {
+                    "enum": ["fireWeapon"]
+                },
+                "ship": {
+                    "description": "The uuid of the firing ship",
+                    "type": "string"
+                },
+                "weapon": {
+                    "description": "The uid of the firing weapon system",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "The uuid of target being fired at, whether ship, ordnance, or other",
+                    "type": "string"
+                },
+                "rolls": {
+                    "description": "Optional d6 results used for this attack (including penetrating rerolls in order).",
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 6
+                    }
+                },
+                "damage": {
+                    "description": "Optional precomputed hull damage from this shot (before armour allocation helpers).",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "notes": {
+                    "type": "string"
+                }
+            },
+            "required": ["name", "ship", "weapon", "target"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Apply damage to a ship object",
+            "properties": {
+                "name": {
+                    "enum": ["dmgShip"]
+                },
+                "ship": {
+                    "description": "The uuid of the ship object",
+                    "type": "string"
+                },
+                "hull": {
+                    "description": "Number of hull points lost. Numbers are additive to existing damage.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                },
+                "armour": {
+                    "description": "Number of boxes of armour lost. First element is the innermost shell. Numbers are additive to existing damage.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["name", "ship", "hull"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Regenerate boxes of armour",
+            "properties": {
+                "name": {
+                    "enum": ["regenArmour"]
+                },
+                "ship": {
+                    "description": "The uuid of the ship in question",
+                    "type": "string"
+                },
+                "armour": {
+                    "description": "Number of boxes of armour to repair. First element is the innermost shell.",
+                    "type": "array",
+                    "items": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                    },
+                    "minItems": 1
+                }
+            },
+            "required": ["name", "ship", "armour"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Disable a system",
+            "properties": {
+                "name": {
+                    "enum": ["sysDisable"]
+                },
+                "ship": {
+                    "description": "Uuid of the ship",
+                    "type": "string"
+                },
+                "system": {
+                    "description": "Uid of the system",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "Helps keep track of whether a system has been repaired before or not.",
+                    "enum": ["damaged", "destroyed"],
+                    "default": "damaged"
+                }
+            },
+            "required": ["name", "ship", "system"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Enable a system",
+            "properties": {
+                "name": {
+                    "enum": ["sysEnable"]
+                },
+                "ship": {
+                    "description": "Uuid of the ship",
+                    "type": "string"
+                },
+                "system": {
+                    "description": "Uid of the system",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "Helps to keep track of whether a system has been repaired before or not.",
+                    "oneOf": [
+                        {
+                            "enum": ["repaired"]
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                }
+            },
+            "required": ["name", "ship", "system"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Destroy an object (remove it completely from the game)",
+            "properties": {
+                "name": {
+                    "enum": ["objDestroy"]
+                },
+                "uuid": {
+                    "description": "Uuid of the object in question",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "uuid"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Hide an object temporarily (e.g., cloaking a ship). To show a ship again, issue a `moveShip` command with valid coordinates.",
+            "properties": {
+                "name": {
+                    "enum": ["objHide"]
+                },
+                "uuid": {
+                    "description": "Uuid of the object in question",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "uuid"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Awards victory points to a player",
+            "properties": {
+                "name": {
+                    "enum": ["awardVP"]
+                },
+                "player": {
+                    "description": "The uuid of the player",
+                    "type": "string"
+                },
+                "vp": {
+                    "description": "The amount of VP to award the player. Can be negative. Is simply added to existing total.",
+                    "type": "integer"
+                }
+            },
+            "required": ["name", "player", "vp"]
+        },
+        {
+            "description": "A generic command used just to insert things into the combat log. These commands have no effect on the actual game visuals.",
+            "properties": {
+                "name": {
+                    "enum": ["_custom"]
+                },
+                "msg": {
+                    "type": "string"
+                }
+            },
+            "required": ["name", "msg"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Advance the turn sequence to a specific phase (1-15).",
+            "properties": {
+                "name": {
+                    "enum": ["advancePhase"]
+                },
+                "phase": {
+                    "description": "Target phase index matching the Continuum turn sequence.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 15
+                },
+                "turn": {
+                    "description": "Optional turn number. If omitted, turn is unchanged unless phase wraps from 15 to 1.",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            },
+            "required": ["name", "phase"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Record initiative rolls for the current turn.",
+            "properties": {
+                "name": {
+                    "enum": ["setInitiative"]
+                },
+                "rolls": {
+                    "description": "Per-player initiative rolls.",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "player": {
+                                "type": "string"
+                            },
+                            "roll": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 6
+                            }
+                        },
+                        "required": ["player", "roll"],
+                        "additionalProperties": false
+                    }
+                },
+                "winner": {
+                    "description": "Player id that won initiative. Required so ties can be resolved by the moderator.",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "rolls", "winner"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Record a dice roll sequence in the combat log for audit/replay. Does not mutate board objects.",
+            "properties": {
+                "name": {
+                    "enum": ["logDice"]
+                },
+                "purpose": {
+                    "description": "Why these dice were rolled (e.g. beam fire, PDS, threshold).",
+                    "type": "string"
+                },
+                "rolls": {
+                    "description": "Ordered list of d6 results.",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 6
+                    }
+                },
+                "source": {
+                    "description": "Where the rolls came from.",
+                    "enum": ["client", "moderatorSequence", "external"],
+                    "default": "client"
+                },
+                "context": {
+                    "description": "Optional freeform context (ship id, weapon id, etc.).",
+                    "type": "string"
+                },
+                "result": {
+                    "description": "Human-readable outcome of the roll (hit/miss, damage, etc.).",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "purpose", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Update game package metadata that is not turn/phase/initiative.",
+            "properties": {
+                "name": {
+                    "enum": ["setMeta"]
+                },
+                "dicePolicy": {
+                    "enum": ["client", "moderatorSequence", "hybrid"]
+                },
+                "diceSeed": {
+                    "description": "Optional seed for reproducible client PRNG.",
+                    "type": "string"
+                },
+                "fleetLimits": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "playerId": { "type": "string" },
+                            "maxPoints": { "type": "number" },
+                            "maxShips": { "type": "integer", "minimum": 0 },
+                            "notes": { "type": "string" }
+                        },
+                        "required": ["playerId"],
+                        "additionalProperties": false
+                    }
+                },
+                "allowVectorMovement": {
+                    "description": "If true, players may choose vector movement when placing ships.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "includeCoreSystemsInThreshold": {
+                    "description": "If true, threshold checks include bridge, life support, and reactor cores.",
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Update optional Core Systems state on a ship (bridge/life support/reactor).",
+            "properties": {
+                "name": {
+                    "enum": ["setCoreState"]
+                },
+                "ship": {
+                    "type": "string"
+                },
+                "powerless": {
+                    "type": "boolean"
+                },
+                "lifeless": {
+                    "description": "Turns until life support fails. Negative clears the field.",
+                    "type": "integer"
+                },
+                "uncontrolled": {
+                    "description": "Turns remaining out of control. Negative clears the field.",
+                    "type": "integer"
+                },
+                "dumped": {
+                    "description": "Reactor dumped — powerless but no explosion rolls.",
+                    "type": "boolean"
+                },
+                "abandonedSinceTurn": {
+                    "description": "Turn crew abandoned ship; lowers explosion threshold. Negative clears.",
+                    "type": "integer"
+                }
+            },
+            "required": ["name", "ship"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Advance within-phase segment (orders to resolve, or resolve to next activation).",
+            "properties": {
+                "name": { "enum": ["advanceSegment"] }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare ordnance launch for current ship activation (phase 3 orders segment). Rockets use targetShip without position.",
+            "properties": {
+                "name": { "enum": ["declareLaunchOrdnance"] },
+                "ship": { "type": "string" },
+                "id": { "type": "string" },
+                "rocketIds": {
+                    "description": "Pre-generated ids for up to 2 rocket markers.",
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "maxItems": 2
+                },
+                "systemId": { "type": "string" },
+                "position": { "$ref": "objects.json#/$defs/position" },
+                "type": { "type": "string" },
+                "range": { "type": "number" },
+                "targetShip": { "type": "string" }
+            },
+            "required": ["name", "ship", "systemId", "type"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve declared ordnance launches for the current ship activation.",
+            "properties": {
+                "name": { "enum": ["resolveLaunchOrdnance"] },
+                "ship": { "type": "string" },
+                "rolls": {
+                    "description": "Optional 2d6 for rocket pod to-hit (override dice policy).",
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 },
+                    "minItems": 2,
+                    "maxItems": 2
+                }
+            },
+            "required": ["name", "ship"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare weapon fire (phase 9 PDS or phase 11 ship fire). notes JSON may include mode, fireControlId, needleSystemId, beamClass, screens, range, arc, pdsDice, weaponName, alteredFromDefaults.",
+            "properties": {
+                "name": { "enum": ["declareShipFire"] },
+                "ship": { "type": "string" },
+                "weapon": { "type": "string" },
+                "target": { "type": "string" },
+                "notes": { "type": "string" }
+            },
+            "required": ["name", "ship", "weapon", "target"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve declared fire for current ship; companion dmgShip commands apply damage.",
+            "properties": {
+                "name": { "enum": ["resolveShipFire"] },
+                "ship": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "ship"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Queue transporter beam hits for post-resolve delivery (phase 11).",
+            "properties": {
+                "name": { "enum": ["queueTransporterDelivery"] },
+                "firerShip": { "type": "string" },
+                "targetShip": { "type": "string" },
+                "weapon": { "type": "string" },
+                "hits": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["name", "firerShip", "targetShip", "weapon", "hits"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare transporter delivery for one banked hit (phase 11).",
+            "properties": {
+                "name": { "enum": ["declareTransporterDelivery"] },
+                "firerShip": { "type": "string" },
+                "targetShip": { "type": "string" },
+                "weapon": { "type": "string" },
+                "attackerOwner": { "type": "string" },
+                "choice": {
+                    "type": "object",
+                    "properties": {
+                        "mode": { "enum": ["boarding", "commando"] },
+                        "payload": { "enum": ["marine", "dcp"] },
+                        "commandoSystemId": { "type": "string" }
+                    },
+                    "required": ["mode", "payload"]
+                },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "firerShip", "targetShip", "weapon", "choice"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Set enemy boarder unit counts for one attacker on a defender ship (replaces that owner's units).",
+            "properties": {
+                "name": { "enum": ["setBoarders"] },
+                "ship": { "type": "string" },
+                "owner": { "type": "string" },
+                "dcp": { "type": "integer", "minimum": 0 },
+                "marines": { "type": "integer", "minimum": 0 },
+                "boardedTurn": { "type": "integer" },
+                "fromShip": { "type": "string", "description": "Friendly ship crew departed from" },
+                "deployMarineIds": { "type": "array", "items": { "type": "string" } },
+                "deployDcpIds": { "type": "array", "items": { "type": "string" } },
+                "deployBuiltinDcp": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["name", "ship", "owner", "dcp", "marines"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Adjust enemy boarder units (+/−) for one attacker on a defender ship.",
+            "properties": {
+                "name": { "enum": ["adjustBoarders"] },
+                "ship": { "type": "string" },
+                "owner": { "type": "string" },
+                "dcp": { "type": "integer" },
+                "marines": { "type": "integer" },
+                "boardedTurn": { "type": "integer" },
+                "fromShip": { "type": "string", "description": "Friendly ship crew departed from" },
+                "deployMarineIds": { "type": "array", "items": { "type": "string" } },
+                "deployDcpIds": { "type": "array", "items": { "type": "string" } },
+                "deployBuiltinDcp": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["name", "ship", "owner"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Remove specific boarder units by id (e.g. after combat).",
+            "properties": {
+                "name": { "enum": ["removeBoarders"] },
+                "ship": { "type": "string" },
+                "unitIds": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "minItems": 1
+                }
+            },
+            "required": ["name", "ship", "unitIds"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Step 1a: Attacker Allocation — declare kill/raze per boarder unit.",
+            "properties": {
+                "name": { "enum": ["declareBoardingAttackerOrders"] },
+                "ship": { "type": "string" },
+                "notes": { "type": "string" }
+            },
+            "required": ["name", "ship", "notes"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Step 1b: Defender Allocation — assign DCP repel and marines per boarder.",
+            "properties": {
+                "name": { "enum": ["declareBoardingDefenderOrders"] },
+                "ship": { "type": "string" },
+                "notes": { "type": "string" }
+            },
+            "required": ["name", "ship", "notes"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve boarding combat (Step 1c: DCP Repel, Step 2: Resolve Combat, Step 3: Raze).",
+            "properties": {
+                "name": { "enum": ["resolveBoardingCombat"] },
+                "ship": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "ship"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Mark a ship's pending hull threshold check as resolved (phase 13).",
+            "properties": {
+                "name": { "enum": ["resolveThresholdCheck"] },
+                "ship": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                },
+                "thresholdIndex": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["name", "ship", "thresholdIndex"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Mark reactor breach resolution complete for phase 15 (effects applied by preceding commands).",
+            "properties": {
+                "name": { "enum": ["resolveReactorBreaches"] },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                },
+                "shipIds": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                }
+            },
+            "required": ["name", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare damage-control repair allocations for phase 14 (JSON notes).",
+            "properties": {
+                "name": { "enum": ["declareRepairOrders"] },
+                "ship": { "type": "string" },
+                "notes": { "type": "string" }
+            },
+            "required": ["name", "ship", "notes"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve declared repair orders for a ship (phase 14).",
+            "properties": {
+                "name": { "enum": ["resolveRepairOrders"] },
+                "ship": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "ship"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve deferred movement and mine placements in phase 5 (moderator).",
+            "properties": {
+                "name": { "enum": ["resolvePhase5Movement"] }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve mine sweep and detonation dice after phase 5 movement.",
+            "properties": {
+                "name": { "enum": ["resolveMinePhase"] },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                },
+                "preExpanded": {
+                    "type": "boolean",
+                    "description": "When true, mine effects were already logged as separate commands."
+                }
+            },
+            "required": ["name", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Adjust regenerative armour damage on one row (phase 14 resolve).",
+            "properties": {
+                "name": { "enum": ["adjustRegenArmour"] },
+                "ship": { "type": "string" },
+                "row": { "type": "integer", "minimum": 0 },
+                "regenerative": { "type": "integer" },
+                "regenerativeLost": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["name", "ship", "row"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Recompute phase 7 homing ordnance allocation proposals (moderator).",
+            "properties": {
+                "name": { "enum": ["proposeOrdnanceAllocations"] }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Manual override for phase 7 ordnance target allocation.",
+            "properties": {
+                "name": { "enum": ["allocateOrdnanceTarget"] },
+                "ordnanceId": { "type": "string" },
+                "action": { "enum": ["target", "destroy", "skip"] },
+                "targetShipId": { "type": "string" }
+            },
+            "required": ["name", "ordnanceId", "action"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Clear a phase 7 ordnance allocation proposal or applied target.",
+            "properties": {
+                "name": { "enum": ["clearOrdnanceAllocation"] },
+                "ordnanceId": { "type": "string" }
+            },
+            "required": ["name", "ordnanceId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Apply pending phase 7 ordnance allocations to the board.",
+            "properties": {
+                "name": { "enum": ["applyOrdnanceAllocations"] }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare phase 7 fighter group attack allocation.",
+            "properties": {
+                "name": { "enum": ["declareFighterAttack"] },
+                "id": { "type": "string" },
+                "targetType": { "enum": ["ship", "fighters", "ordnance"] },
+                "targetId": { "type": "string" }
+            },
+            "required": ["name", "id", "targetType", "targetId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Set or clear a fighter group's display callsign (moderator).",
+            "properties": {
+                "name": { "enum": ["setFighterCallsign"] },
+                "id": {
+                    "description": "Fighter group id.",
+                    "type": "string"
+                },
+                "callsign": {
+                    "description": "New callsign; omit or empty string to clear.",
+                    "type": "string",
+                    "maxLength": 32
+                }
+            },
+            "required": ["name", "id"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Set operational fighter type (moderator). Used after multiRole placement.",
+            "properties": {
+                "name": { "enum": ["setFighterType"] },
+                "id": { "type": "string" },
+                "type": { "type": "string" }
+            },
+            "required": ["name", "id", "type"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Launch fighter wing ordnance (phase 3).",
+            "properties": {
+                "name": { "enum": ["launchFighterOrdnance"] },
+                "id": { "type": "string" },
+                "targetShipId": { "type": "string" },
+                "payloadSpent": { "type": "boolean" }
+            },
+            "required": ["name", "id", "targetShipId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve a multi-group furball dogfight (phase 8).",
+            "properties": {
+                "name": { "enum": ["resolveFurball"] },
+                "engagement": {
+                    "type": "object",
+                    "properties": {
+                        "attackers": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": { "type": "string" },
+                                    "targetIds": {
+                                        "type": "array",
+                                        "items": { "type": "string" }
+                                    }
+                                },
+                                "required": ["id", "targetIds"],
+                                "additionalProperties": false
+                            }
+                        },
+                        "defenders": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": { "type": "string" },
+                                    "targetIds": {
+                                        "type": "array",
+                                        "items": { "type": "string" }
+                                    }
+                                },
+                                "required": ["id", "targetIds"],
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": ["attackers", "defenders"],
+                    "additionalProperties": false
+                },
+                "rolls": {
+                    "description": "Dice sequence for deterministic replay.",
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "engagement"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Fighter group intercepts ordnance (phase 8).",
+            "properties": {
+                "name": { "enum": ["interceptOrdnance"] },
+                "id": {
+                    "description": "Intercepting fighter group id.",
+                    "type": "string"
+                },
+                "ordnanceId": { "type": "string" },
+                "rolls": {
+                    "description": "Dice sequence for deterministic replay.",
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "id", "ordnanceId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare a furball engagement for phase 8 (orders segment; no dice).",
+            "properties": {
+                "name": { "enum": ["declareFurball"] },
+                "engagement": {
+                    "type": "object",
+                    "properties": {
+                        "attackers": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": { "type": "string" },
+                                    "targetIds": {
+                                        "type": "array",
+                                        "items": { "type": "string" }
+                                    }
+                                },
+                                "required": ["id", "targetIds"],
+                                "additionalProperties": false
+                            }
+                        },
+                        "defenders": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": { "type": "string" },
+                                    "targetIds": {
+                                        "type": "array",
+                                        "items": { "type": "string" }
+                                    }
+                                },
+                                "required": ["id", "targetIds"],
+                                "additionalProperties": false
+                            }
+                        }
+                    },
+                    "required": ["attackers", "defenders"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["name", "engagement"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Moderator batch-resolve all declareFurball engagements in phase 8.",
+            "properties": {
+                "name": { "enum": ["resolvePhase8Furballs"] },
+                "rolls": {
+                    "description": "Dice sequence for deterministic replay (all engagements).",
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                },
+                "count": {
+                    "description": "Number of engagements resolved.",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "notes": {
+                    "description": "Human-readable summary of all engagements (for log display and replay).",
+                    "type": "string"
+                }
+            },
+            "required": ["name", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Declare point defense allocation for phase 9.",
+            "properties": {
+                "name": { "enum": ["declarePointDefense"] },
+                "defenderShip": { "type": "string" },
+                "weapon": { "type": "string" },
+                "supportedShip": { "type": "string" },
+                "threatId": { "type": "string" },
+                "profile": { "type": "string" },
+                "adsMode": { "enum": ["long", "split"] },
+                "splitTargetId": { "type": "string" }
+            },
+            "required": ["name", "defenderShip", "weapon", "threatId"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Moderator batch-resolve all point defense declarations in phase 9.",
+            "properties": {
+                "name": { "enum": ["resolvePhase9PointDefense"] },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                },
+                "count": { "type": "integer", "minimum": 0 },
+                "notes": { "type": "string" },
+                "pdKillsByOrdnance": {
+                    "type": "object",
+                    "additionalProperties": { "type": "integer" }
+                },
+                "survivingFighterAttackers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "groupId": { "type": "string" },
+                            "targetShipId": { "type": "string" },
+                            "number": { "type": "integer" }
+                        },
+                        "required": ["groupId", "targetShipId", "number"]
+                    }
+                }
+            },
+            "required": ["name", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve one point defense mount in phase 9 (scrub-back step).",
+            "properties": {
+                "name": { "enum": ["resolvePointDefenseMount"] },
+                "defenderShip": { "type": "string" },
+                "weapon": { "type": "string" },
+                "supportedShip": { "type": "string" },
+                "threatId": { "type": "string" },
+                "profile": { "type": "string" },
+                "adsMode": { "enum": ["long", "split"] },
+                "splitTargetId": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "defenderShip", "weapon", "threatId", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Phase 9 point defense resolve complete (rollup metadata only).",
+            "properties": {
+                "name": { "enum": ["resolvePhase9Complete"] },
+                "count": { "type": "integer", "minimum": 0 },
+                "notes": { "type": "string" },
+                "pdKillsByOrdnance": {
+                    "type": "object",
+                    "additionalProperties": { "type": "integer" }
+                },
+                "survivingFighterAttackers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "groupId": { "type": "string" },
+                            "targetShipId": { "type": "string" },
+                            "number": { "type": "integer" }
+                        },
+                        "required": ["groupId", "targetShipId", "number"]
+                    }
+                }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Detonate AMT open-space or PBL in phase 10.",
+            "properties": {
+                "name": { "enum": ["detonateOrdnance"] },
+                "ordnanceId": { "type": "string" },
+                "mode": { "enum": ["amtOpenSpace", "pbl"] },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "ordnanceId", "mode", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Homing ordnance strike vs ship in phase 10.",
+            "properties": {
+                "name": { "enum": ["strikeOrdnance"] },
+                "ordnanceId": { "type": "string" },
+                "targetShipId": { "type": "string" },
+                "mode": { "enum": ["salvo", "heavy", "amtImpact"] },
+                "pdKills": { "type": "integer", "minimum": 0 },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "ordnanceId", "targetShipId", "mode", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Phase 10 section 8.9 attack-run intercept.",
+            "properties": {
+                "name": { "enum": ["attackRunIntercept"] },
+                "interceptorId": { "type": "string" },
+                "attackerId": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "interceptorId", "attackerId", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Fighter ship attack run in phase 10.",
+            "properties": {
+                "name": { "enum": ["fighterShipStrike"] },
+                "groupId": { "type": "string" },
+                "targetShipId": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "groupId", "targetShipId", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Gunboat squadron ship attack in phase 10.",
+            "properties": {
+                "name": { "enum": ["gunboatShipStrike"] },
+                "groupId": { "type": "string" },
+                "targetShipId": { "type": "string" },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "groupId", "targetShipId", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Phase 10 strike resolution complete (rollup metadata).",
+            "properties": {
+                "name": { "enum": ["resolvePhase10Complete"] },
+                "count": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Phase 11 hull-destruction cleanup rollup (ships removed at transition to phase 12).",
+            "properties": {
+                "name": { "enum": ["resolvePhase11HullDestruction"] },
+                "count": { "type": "integer", "minimum": 0 }
+            },
+            "required": ["name"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Bank EMP beam hits on a target ship for phase 13 resolution.",
+            "properties": {
+                "name": { "enum": ["bankEmpHits"] },
+                "targetShip": { "type": "string" },
+                "firerShip": { "type": "string" },
+                "weapon": { "type": "string" },
+                "hits": { "type": "integer", "minimum": 1 }
+            },
+            "required": ["name", "targetShip", "firerShip", "weapon", "hits"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Attacker allocates banked EMP hits to target systems (phase 13).",
+            "properties": {
+                "name": { "enum": ["declareEmpAllocation"] },
+                "targetShip": { "type": "string" },
+                "firerShip": { "type": "string" },
+                "weapon": { "type": "string" },
+                "allocations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "systemId": { "type": "string" },
+                            "hitCount": { "type": "integer", "minimum": 1 }
+                        },
+                        "required": ["systemId", "hitCount"],
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "required": ["name", "targetShip", "firerShip", "weapon", "allocations"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Resolve banked EMP hits on a target after allocations (phase 13).",
+            "properties": {
+                "name": { "enum": ["resolveEmpAllocation"] },
+                "targetShip": { "type": "string" },
+                "allocations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "systemId": { "type": "string" },
+                            "hitCount": { "type": "integer", "minimum": 1 }
+                        },
+                        "required": ["systemId", "hitCount"],
+                        "additionalProperties": false
+                    }
+                },
+                "hullRowDrm": { "type": "integer", "minimum": 0 },
+                "rolls": {
+                    "type": "array",
+                    "items": { "type": "integer", "minimum": 1, "maximum": 6 }
+                }
+            },
+            "required": ["name", "targetShip", "allocations", "rolls"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Mark a ship as captured by boarding (exempt from hull-destruction sweep).",
+            "properties": {
+                "name": { "enum": ["setShipCaptured"] },
+                "ship": { "type": "string" },
+                "capturedBy": { "type": "string" },
+                "turn": { "type": "integer" }
+            },
+            "required": ["name", "ship", "capturedBy"],
+            "additionalProperties": false
+        },
+        {
+            "description": "Transfer ship ownership (e.g. after boarding capture).",
+            "properties": {
+                "name": { "enum": ["setShipOwner"] },
+                "ship": { "type": "string" },
+                "owner": { "type": "string" }
+            },
+            "required": ["name", "ship", "owner"],
+            "additionalProperties": false
+        }
+    ]
+}

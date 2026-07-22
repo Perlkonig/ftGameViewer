@@ -1,0 +1,137 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "https://www.abstractplay.com/schemas/fullthrust/game/position/1-0-0.json#",
+    "title": "Full Thrust Game Position",
+    "description": "Description of a discrete game state that the viewer renders. This is typically the accumulation of a list of commands.",
+    "type": "object",
+    "properties": {
+        "players": {
+            "description": "List of participating players. Must be defined before one can assign objects to them.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "A UUID for the player, typically a name of some sort.",
+                        "type": "string"
+                    },
+                    "colour": {
+                        "description": "A valid hexadecimal colour string that will be used to identify objects belonging to different players.",
+                        "type": "string",
+                        "minLength": 7,
+                        "maxLength": 7,
+                        "pattern": "/^#[A-Fa-f0-9]{6}$/"
+                    },
+                    "vp": {
+                        "description": "Current victory point total",
+                        "type": "number",
+                        "default": 0
+                    }
+                },
+                "required": ["id", "colour"]
+            }
+        },
+        "map": {
+            "description": "Determines the default dimensions and behaviour of the map display.",
+            "type": "object",
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "mode": {
+                            "description": "A fixed map has firm boundaries, as if you were playing on a kitchen table. This is best if you're dealing with map features or otherwise relatively fixed objectives you expect players to stay close to.",
+                            "enum": ["fixed"]
+                        },
+                        "width": {
+                            "description": "In movement units. The default approximates a six-foot-long table.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 72
+                        },
+                        "height": {
+                            "description": "In movement units. The default approximates a four-foot-wide table.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 48
+                        }
+                    },
+                    "required": ["mode", "width", "height"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "mode": {
+                            "description": "A fluid map is ever changing. It will always be large enough to encompass all visible objects. Users can then add a dynamic buffer, allowing them handle movement outside of the boundaries or to introduce new objects. This is the best map type for fights with no fixed point that players must stay close to.",
+                            "enum": ["fluid"]
+                        },
+                        "width": {
+                            "description": "Starting width in movement units before dynamic sizing begins (turn 1 phase 2). Default approximates a six-foot-long table.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 72
+                        },
+                        "height": {
+                            "description": "Starting height in movement units before dynamic sizing begins (turn 1 phase 2). Default approximates a four-foot-wide table.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 48
+                        },
+                        "buffer": {
+                            "description": "Default margin in movement units around visible objects once dynamic sizing is active. The live buffer slider is cosmetic only.",
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 48,
+                            "default": 12
+                        }
+                    },
+                    "required": ["mode", "width", "height", "buffer"]
+                }
+            ]
+        },
+        "mapFeatures": {
+            "description": "Map features are background features like planets or other phenomena. They do not move and cannot be interacted with.",
+            "type": "array",
+            "minItems": 0,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for this feature. Must match the `id` attribute in the associated SVG symbol",
+                        "type": "string"
+                    },
+                    "symbol": {
+                        "description": "All features must be expressed as an svg `<symbol>` tag with both a `viewBox` attribute and an `id` attribute that matches the `id` given above.",
+                        "type": "string"
+                    },
+                    "x": {
+                        "description": "Centre x coordinate, given in MUs.",
+                        "type": "number"
+                    },
+                    "y": {
+                        "description": "Centre y coordinate, given in MUs.",
+                        "type": "number"
+                    },
+                    "width": {
+                        "description": "Given in MUs.",
+                        "type": "number"
+                    },
+                    "height": {
+                        "description": "Given in MUs.",
+                        "type": "number"
+                    }
+                },
+                "required": ["id", "symbol", "x", "y", "width", "height"],
+                "additionalProperties": false
+            }
+        },
+        "objects": {
+            "description": "The list of visible and interactive objects.",
+            "type": "array",
+            "minItems": 0,
+            "items": {
+                "$ref": "objects.json"
+            }
+        }
+    }
+}

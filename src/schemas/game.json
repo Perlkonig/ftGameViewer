@@ -1,0 +1,164 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "$id": "https://www.abstractplay.com/schemas/fullthrust/game/package/1-0-0.json#",
+    "title": "Full Thrust Game Package",
+    "description": "Shareable game package: metadata plus initial state and append-only command log. Positions are derived by folding commands onto initialState.",
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "Package schema version.",
+            "type": "string",
+            "default": "1.0.0"
+        },
+        "name": {
+            "description": "Human-readable game name.",
+            "type": "string"
+        },
+        "createdAt": {
+            "description": "ISO-8601 creation timestamp.",
+            "type": "string"
+        },
+        "turn": {
+            "description": "Current turn number (1-based).",
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+        },
+        "phase": {
+            "description": "Current phase index (1 Write Orders … 15 Reactor Explosion).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "default": 1
+        },
+        "segment": {
+            "description": "Within-phase segment: orders (collect declarations) or resolve (roll dice / apply).",
+            "enum": ["orders", "resolve"]
+        },
+        "boardingStep": {
+            "description": "Phase 12 orders sub-step: Step 1a Attacker Allocation, then Step 1b Defender Allocation.",
+            "enum": ["attacker", "defender"]
+        },
+        "activation": {
+            "description": "Per-ship/group activation cursor for segmented phases.",
+            "type": "object",
+            "properties": {
+                "queue": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                },
+                "index": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "required": ["queue", "index"],
+            "additionalProperties": false
+        },
+        "initiative": {
+            "description": "Latest initiative result for the current turn.",
+            "type": "object",
+            "properties": {
+                "rolls": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "player": { "type": "string" },
+                            "roll": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 6
+                            }
+                        },
+                        "required": ["player", "roll"]
+                    }
+                },
+                "winner": { "type": "string" }
+            },
+            "required": ["rolls", "winner"]
+        },
+        "dicePolicy": {
+            "description": "How authoritative dice are obtained.",
+            "enum": ["client", "moderatorSequence", "hybrid"],
+            "default": "hybrid"
+        },
+        "diceSeed": {
+            "description": "Optional seed for reproducible client PRNG.",
+            "type": "string"
+        },
+        "allowVectorMovement": {
+            "description": "If true, players may opt into vector movement when placing ships (fixed per ship).",
+            "type": "boolean",
+            "default": false
+        },
+        "includeCoreSystemsInThreshold": {
+            "description": "If true, threshold checks include bridge, life support, and reactor cores.",
+            "type": "boolean",
+            "default": true
+        },
+        "reactorBreachesEnabled": {
+            "description": "If true and core systems enabled, reactor explosions deal SAP area damage within 3 MU.",
+            "type": "boolean",
+            "default": true
+        },
+        "fleetLimits": {
+            "description": "Optional per-player fleet construction limits (enforced socially / by moderator).",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "playerId": { "type": "string" },
+                    "maxPoints": { "type": "number" },
+                    "maxShips": { "type": "integer", "minimum": 0 },
+                    "notes": { "type": "string" }
+                },
+                "required": ["playerId"],
+                "additionalProperties": false
+            }
+        },
+        "map": {
+            "description": "Table / play area for this game. Copied into initialState at setup and kept in sync for export.",
+            "$ref": "position.json#/properties/map"
+        },
+        "players": {
+            "description": "Participating players defined at game setup. Copied into initialState at setup and kept in sync for export.",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "Player name or identifier.",
+                        "type": "string"
+                    },
+                    "colour": {
+                        "description": "Hex colour for this player's units.",
+                        "type": "string",
+                        "minLength": 7,
+                        "maxLength": 7,
+                        "pattern": "/^#[A-Fa-f0-9]{6}$/"
+                    },
+                    "vp": {
+                        "description": "Starting victory points (usually 0).",
+                        "type": "number",
+                        "default": 0
+                    }
+                },
+                "required": ["id", "colour"]
+            }
+        },
+        "initialState": {
+            "$ref": "position.json"
+        },
+        "commands": {
+            "description": "Append-only command log. Fold onto initialState to derive the current position and meta.",
+            "type": "array",
+            "items": {
+                "$ref": "commands.json"
+            }
+        }
+    },
+    "required": ["version", "name", "createdAt", "turn", "phase", "dicePolicy", "map", "players", "initialState", "commands"],
+    "additionalProperties": false
+}
