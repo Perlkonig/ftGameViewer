@@ -13,9 +13,9 @@
         applyAdvancedScreenReduction,
         normalizeArmourDamageTaken,
         normalizeArmourLayers,
-        screenLevelFromSystems,
         type ScreenLevel,
     } from "@/lib/game/combat";
+    import { effectiveIntrinsicScreens } from "@/lib/game/shipSystems";
     import { createDiceFromPolicy, parseDiceString, policyRollSource } from "@/lib/game/dice";
     import {
         computeShipDamageApplication,
@@ -161,9 +161,7 @@
         }
 
         const cmds: FullThrustGameCommand[] = [];
-        const systems = (target.object as { systems?: { name?: string; type?: string; level?: number }[] })
-            ?.systems;
-        const screens = screenLevelFromSystems(Array.isArray(systems) ? systems : []);
+        const screens = effectiveIntrinsicScreens(target as import("@/lib/game/shipSystems").ShipGameState);
 
         if (mode === "salvo") {
             const attackRoll = rolls[0];

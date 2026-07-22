@@ -91,6 +91,15 @@ describe("pushHullDamageCommands", () => {
             { name: "objDestroy", uuid: "A1" },
         ]);
     });
+
+    it("defers objDestroy during phase 11 simultaneous fire", () => {
+        const cmds: FullThrustGameCommand[] = [];
+        pushHullDamageCommands(cmds, "A1", corvette, 4, 0, "standard", { deferObjDestroy: true });
+        expect(cmds).toEqual([
+            { name: "dmgShip", ship: "A1", hull: 2, armour: [1] },
+            { name: "_custom", msg: "Ship A1 destroyed." },
+        ]);
+    });
 });
 
 describe("resolveBeamDeclaration", () => {

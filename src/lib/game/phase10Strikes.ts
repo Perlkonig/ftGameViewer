@@ -40,7 +40,7 @@ import {
 } from "./gunboatProfiles";
 import { gunboatGroupLabel } from "./gunboatLabel";
 import { isDeployedGunboat } from "./gunboatMove";
-import { distance } from "./movement";
+import { distance, type Point } from "./movement";
 import {
     resolveAmtOpenSpaceBlast,
     resolveAmtOpenSpaceBlastFromRolls,
@@ -54,7 +54,7 @@ import {
     computeShipDamageApplication,
     pushAppliedHullDamageCommands,
 } from "./resolveCombat";
-import { screenLevelFromSystems } from "./combat";
+import type { ShipGameState } from "./shipSystems";
 import {
     isFighterExhausted,
     nextEnduranceAfterCombat,
@@ -117,10 +117,12 @@ function findShip(position: FullThrustGamePosition, id: string): ShipObj | undef
     return obj?.objType === "ship" ? (obj as ShipObj) : undefined;
 }
 
-function shipScreens(ship: ShipObj): number {
-    const systems = (ship.object as { systems?: { name?: string; type?: string; level?: number }[] })
-        ?.systems;
-    return screenLevelFromSystems(Array.isArray(systems) ? systems : []);
+function shipScreens(
+    ship: ShipObj,
+    position: FullThrustGamePosition,
+    attackerPoint?: Point
+): number {
+    return effectiveScreensForIncomingFire(position, ship as ShipGameState, attackerPoint);
 }
 
 function amtStillViable(ord: OrdnanceObj): boolean {
@@ -660,13 +662,14 @@ function buildFighterShipStrikeCommands(
     if (!fighter || !target || (fighter.number ?? 0) <= 0) return [];
 
     const mark = source.mark();
-    const screens = shipScreens(target);
+    const fpos = fighter.position as Point | undefined;
+    const screens = shipScreens(target, position, fpos);
     const wing = fighterWingFromObj(fighter);
     const profile = fighterProfileFor(wing);
     const weaponMode = (fighter as { weaponMode?: "beam" | "cannon" }).weaponMode;
     const result = resolveFighterStrikeWithProfile(
         fighter.number ?? 6,
-        screens as 0 | 1 | 2,
+        screens as 0 | 1 | 2 | 3,
         profile,
         "ship",
         weaponMode,
@@ -724,7 +727,7 @@ function buildGunboatShipStrikeCommands(
     const tpos = target.position as { x: number; y: number };
     const dist =
         gpos && tpos && "x" in gpos && "x" in tpos ? distance(gpos, tpos) : 12;
-    const screens = shipScreens(target);
+    const screens = shipScreens(target, position, gpos);
     const ctx = {
         protection: (gunboat as { protection?: "heavy" | "screened" }).protection,
         ecm: (gunboat as { ecm?: number }).ecm,
@@ -845,12 +848,14 @@ export function applyPhase10StrikeCommand(
             const fighter = findFighter(position, c.groupId);
             if (!fighter) return;
             const target = c.targetShipId ? findShip(position, c.targetShipId) : undefined;
-            const screens = target ? shipScreens(target) : 0;
+            const screens = target
+                ? shipScreens(target, position, fighter.position as Point | undefined)
+                : 0;
             const wing = fighterWingFromObj(fighter);
             const profile = fighterProfileFor(wing);
             resolveFighterStrikeWithProfile(
                 fighter.number ?? 6,
-                screens as 0 | 1 | 2,
+                screens as 0 | 1 | 2 | 3,
                 profile,
                 "ship",
                 (fighter as { weaponMode?: "beam" | "cannon" }).weaponMode,

@@ -84,7 +84,7 @@
     let showResolvePrompt = false;
     let showPhase5Movement = false;
 
-    const isMod = () => ($userSettings.role ?? "player") === "moderator";
+    $: isMod = ($userSettings.role ?? "player") === "moderator";
 
     const closePrompt = () => {
         promptKind = null;
@@ -99,7 +99,7 @@
     };
 
     const nextStep = () => {
-        if (!isMod()) {
+        if (!isMod) {
             toast.push("Only the moderator advances steps");
             return;
         }
@@ -176,7 +176,7 @@
     };
 
     const advance = () => {
-        if (!isMod()) {
+        if (!isMod) {
             toast.push("Only the moderator advances phases");
             return;
         }
@@ -323,7 +323,7 @@
                 <p class="is-size-7">Dice policy: {meta.dicePolicy}</p>
             </div>
             <div class="column is-narrow buttons">
-                {#if isMod()}
+                {#if isMod}
                     {#if meta.phase === 5}
                         <button
                             class="button is-warning is-small"

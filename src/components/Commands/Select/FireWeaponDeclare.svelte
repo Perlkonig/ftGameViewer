@@ -26,7 +26,8 @@
         type ShipFireProfileKey,
     } from "@/lib/weaponAnnotations";
     import { encodeFireDeclarationNotes } from "@/lib/game/resolveCombat";
-    import { screenLevelFromSystems } from "@/lib/game/combat";
+    import { effectiveScreensForIncomingFire } from "@/lib/game/areaScreens";
+import type { ShipGameState } from "@/lib/game/shipSystems";
     import { distance, bearingArc, type ClockFacing } from "@/lib/game/movement";
     import { parseObjectRef } from "@/lib/objectRef";
     import type { FullThrustGameCommand } from "@/schemas/commands";
@@ -98,10 +99,15 @@
     $: pdsTarget = targetFighter ?? targetOrdnance;
 
     $: if (autoScreens && targetShip) {
-        const systems = (
-            targetShip.object as { systems?: { name?: string; type?: string; level?: number }[] }
-        )?.systems;
-        screens = screenLevelFromSystems(Array.isArray(systems) ? systems : []);
+        const firerPos =
+            firer?.position && typeof firer.position === "object" && "x" in firer.position
+                ? (firer.position as { x: number; y: number })
+                : undefined;
+        screens = effectiveScreensForIncomingFire(
+            $currentState.state ?? undefined,
+            targetShip as ShipGameState,
+            firerPos
+        );
         defaultScreens = screens;
     }
 
@@ -455,6 +461,7 @@
                     <option value={0}>0</option>
                     <option value={1}>1</option>
                     <option value={2}>2</option>
+                    <option value={3}>3</option>
                 </select>
             </div>
         </div>

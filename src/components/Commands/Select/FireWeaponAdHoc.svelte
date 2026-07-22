@@ -6,11 +6,11 @@
         beamDicePool,
         resolveBeamAttack,
         resolvePdsPool,
-        screenLevelFromSystems,
         type ScreenLevel,
         type DamageType,
     } from "@/lib/game/combat";
-    import { pushHullDamageCommands, computeShipDamageApplication } from "@/lib/game/resolveCombat";
+    import { effectiveScreensForIncomingFire } from "@/lib/game/areaScreens";
+    import { pushHullDamageCommands, computeShipDamageApplication, hullDamageOptionsForPhase } from "@/lib/game/resolveCombat";
     import {
         formatAppliedDamage,
         formatNeedleResultNotes,
@@ -29,6 +29,7 @@
     import { userSettings } from "@/stores/writeUserSettings";
     import { focusMapOnObjectId, focusMapOnShipId } from "@/lib/actMapInteraction";
     import { distance, bearingArc, type ClockFacing } from "@/lib/game/movement";
+    import type { ShipGameState } from "@/lib/game/shipSystems";
 
     const dispatch = createEventDispatcher();
 
@@ -71,9 +72,15 @@
     $: pdsTarget = targetFighter ?? targetOrdnance;
 
     $: if (autoScreens && targetShip) {
-        const systems = (targetShip.object as { systems?: { name?: string; type?: string; level?: number }[] })
-            ?.systems;
-        screens = screenLevelFromSystems(Array.isArray(systems) ? systems : []);
+        const firerPos =
+            firer?.position && typeof firer.position === "object" && "x" in firer.position
+                ? (firer.position as { x: number; y: number })
+                : undefined;
+        screens = effectiveScreensForIncomingFire(
+            $currentState.state ?? undefined,
+            targetShip as ShipGameState,
+            firerPos
+        );
     }
 
     $: range =
@@ -124,7 +131,15 @@
         penetrating: number,
         type: DamageType
     ) => {
-        pushHullDamageCommands(cmds, shipId, ship as never, normal, penetrating, type);
+        pushHullDamageCommands(
+            cmds,
+            shipId,
+            ship as never,
+            normal,
+            penetrating,
+            type,
+            hullDamageOptionsForPhase($currentState.meta?.phase)
+        );
     };
 
     const fire = () => {
@@ -412,6 +427,7 @@
                 <option value={0}>0</option>
                 <option value={1}>1</option>
                 <option value={2}>2</option>
+                <option value={3}>3</option>
             </select>
         </div>
     </div>

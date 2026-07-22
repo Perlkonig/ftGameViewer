@@ -7,9 +7,9 @@ import { arrayRollSource } from "./dice";
 import {
     applyAdvancedScreenReduction,
     resolveBeamDieSplit,
-    screenLevelFromSystems,
     type ScreenLevel,
 } from "./combat";
+import { effectiveScreensForIncomingFire } from "./areaScreens";
 import { distance, type Point } from "./movement";
 import { listShipSystems, type ShipGameState } from "./shipSystems";
 import { isDeployedFighter } from "./fighterMove";
@@ -53,10 +53,12 @@ function mapPoint(obj: { position?: unknown }): Point | undefined {
     return pos as Point;
 }
 
-function shipScreens(ship: ShipObj): ScreenLevel {
-    const systems = (ship.object as { systems?: { name?: string; type?: string; level?: number }[] })
-        ?.systems;
-    return screenLevelFromSystems(Array.isArray(systems) ? systems : []);
+function shipScreens(
+    ship: ShipObj,
+    position: FullThrustGamePosition,
+    attackerPoint: Point
+): ScreenLevel {
+    return effectiveScreensForIncomingFire(position, ship as ShipGameState, attackerPoint);
 }
 
 export function objectsInRadius(
@@ -110,7 +112,7 @@ export function resolveAmtOpenSpaceBlast(
         const obj = position.objects?.find((o) => o.id === t.id);
         if (!obj) continue;
         if (obj.objType === "ship") {
-            const screens = shipScreens(obj as ShipObj);
+            const screens = shipScreens(obj as ShipObj, position, center);
             const reduced = applyScreenToDice(dice, screens);
             const total = reduced.reduce((a, b) => a + b, 0);
             hits.push({
@@ -177,7 +179,7 @@ export function resolveAmtShipImpactBlast(
             if (t.objType !== "ship") continue;
             const dice = rollD6Pool(tier.dice, source);
             const ship = position.objects?.find((o) => o.id === t.id) as ShipObj;
-            const screens = shipScreens(ship);
+            const screens = shipScreens(ship, position, center);
             const reduced = applyAdvancedScreenReduction(dice, screens > 1 ? 2 : screens);
             const total = reduced.reduce((a, b) => a + b, 0);
             const existing = hits.find((h) => h.objectId === t.id);
@@ -226,7 +228,7 @@ export function resolvePblDetonationBlast(
         const obj = position.objects?.find((o) => o.id === t.id);
         if (!obj) continue;
         if (obj.objType === "ship") {
-            const screens = shipScreens(obj as ShipObj);
+            const screens = shipScreens(obj as ShipObj, position, center);
             let normal = 0;
             let penetrating = 0;
             for (let i = 0; i < beamClass; i++) {

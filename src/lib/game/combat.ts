@@ -3,7 +3,25 @@
 import type { RollSource } from "./dice";
 import { arrayRollSource } from "./dice";
 
-export type ScreenLevel = 0 | 1 | 2;
+/** On-SSD screen systems only (max 2). */
+export type IntrinsicScreenLevel = 0 | 1 | 2;
+/** Effective standard screens in combat (intrinsic + area bubble, max 3). */
+export type ScreenLevel = 0 | 1 | 2 | 3;
+
+export interface ScreenSystemFields {
+    name?: string;
+    type?: string;
+    level?: number;
+    area?: boolean;
+}
+
+export function isStandardScreenSystem(s: ScreenSystemFields): boolean {
+    return (s.name ?? "").toLowerCase() === "screen";
+}
+
+export function isAreaScreenSystem(s: ScreenSystemFields): boolean {
+    return isStandardScreenSystem(s) && s.area === true;
+}
 
 export interface BeamAttackInput {
     /** Beam class 1–5 (dice at closest band). */
@@ -119,6 +137,7 @@ export function resolvePlasmaDamagePerHit(
         const dmg = Math.max(0, roll - 2 - screens);
         total += dmg;
         if (roll !== 6) break;
+        if (screens >= 3) break;
         roll = source.next();
         rolls.push(roll);
     }
@@ -156,7 +175,7 @@ export function resolveMkpHits(source: RollSource): { hits: number; rolls: numbe
 /**
  * Resolve a single attack die with on-demand rolls (including penetrating reroll chain).
  * Table: 1–3 miss; 4–5 = 1 dmg; 6 = 2 dmg + penetrating reroll.
- * Screen L1: ignore 4s. Screen L2: 6s deal 1 instead of 2 (reroll still happens on 6).
+ * Screen L1: ignore 4s. Screen L2+: 6s deal 1 instead of 2. L3: no penetrating reroll.
  */
 export function resolveBeamDieSplit(
     source: RollSource,
@@ -165,7 +184,7 @@ export function resolveBeamDieSplit(
 ): {
     result: DieResult & { normalDamage: number; penetratingDamage: number };
 } {
-    const allowReroll = opts.allowPenetratingReroll !== false;
+    const allowReroll = opts.allowPenetratingReroll !== false && screens < 3;
     const roll = source.next();
     const rerolls: number[] = [];
     let normalDamage = 0;
@@ -452,14 +471,13 @@ export function applyDamageToShip(
     return { hullDamage, armourDamage };
 }
 
-export function screenLevelFromSystems(systems: { name?: string; type?: string; level?: number }[]): ScreenLevel {
-    let level: ScreenLevel = 0;
+/** Max intrinsic screen level from SSD systems (redundant backups do not stack). */
+export function screenLevelFromSystems(systems: ScreenSystemFields[]): IntrinsicScreenLevel {
+    let level: IntrinsicScreenLevel = 0;
     for (const s of systems) {
-        const n = `${s.name ?? ""} ${s.type ?? ""}`.toLowerCase();
-        if (n.includes("screen")) {
-            const lv = s.level ?? (n.includes("2") ? 2 : 1);
-            level = Math.max(level, Math.min(2, lv)) as ScreenLevel;
-        }
+        if (!isStandardScreenSystem(s)) continue;
+        const lv = Math.min(2, Math.max(1, s.level ?? 1));
+        level = Math.max(level, lv) as IntrinsicScreenLevel;
     }
     return level;
 }

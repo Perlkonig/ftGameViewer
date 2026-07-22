@@ -43,7 +43,7 @@
     import { shipFireProfile, type ShipFireProfileKey } from "@/lib/game/shipFireProfiles";
     import { canOperateAsShipFire } from "@/lib/game/shipFireProfiles";
     import { encodeFireDeclarationNotes, decodeFireDeclarationNotes } from "@/lib/game/resolveCombat";
-    import { screenLevelFromSystems } from "@/lib/game/combat";
+    import { effectiveScreensForIncomingFire } from "@/lib/game/areaScreens";
     import { distance, bearingArc, type ClockFacing, type FireArc } from "@/lib/game/movement";
     import type { FullThrustGameCommand } from "@/schemas/commands";
     import type { FullThrustShip } from "ftlibship";
@@ -117,6 +117,15 @@
     $: functionalFc = firer ? functionalFireControls(firer as ShipGameState) : [];
     $: requiresFc = firer ? shipRequiresFireControl(firer as ShipGameState) : false;
     $: shipWeapons = firer ? shipFireWeaponEntries(firer as ShipGameState) : [];
+
+    $: if (firer && $currentState.state && assignments.length) {
+        assignments = assignments.map((a) => {
+            if (!a.autoScreens || (a.profile !== "beam" && a.profile !== "plasma")) return a;
+            const def = defaultScreensForTarget(a.targetId);
+            if (a.screens === def && a.defaultScreens === def) return a;
+            return { ...a, screens: def, defaultScreens: def };
+        });
+    }
 
     $: enemyShips = allObjects.filter(
         (o) =>
@@ -254,10 +263,7 @@
             const profile =
                 meta.profile ?? inferShipFireProfile(weapon);
             const defaultBeamClass = defaultBeamClassForWeapon(weapon);
-            const tgt = targetShip(summary.targetId);
-            const systems = (tgt?.object as { systems?: { name?: string; type?: string; level?: number }[] })
-                ?.systems;
-            const defaultScreens = screenLevelFromSystems(Array.isArray(systems) ? systems : []);
+            const defaultScreens = defaultScreensForTarget(summary.targetId);
             const beamClass = meta.beamClass ?? defaultBeamClass;
             const screens = meta.screens ?? defaultScreens;
             const autoScreens =
@@ -352,6 +358,20 @@
             | FullThrustGameObjects
             | undefined;
 
+    const defaultScreensForTarget = (targetId: string): number => {
+        const tgt = targetShip(targetId);
+        if (!tgt) return 0;
+        const firerPos =
+            firer?.position && typeof firer.position === "object" && "x" in firer.position
+                ? (firer.position as { x: number; y: number })
+                : undefined;
+        return effectiveScreensForIncomingFire(
+            get(currentState).state ?? undefined,
+            tgt as ShipGameState,
+            firerPos
+        );
+    };
+
     const arcToTarget = (targetId: string): FireArc | undefined => {
         const tgt = targetShip(targetId);
         if (!firer?.position || !tgt?.position) return undefined;
@@ -406,9 +426,7 @@
         const defaultBeamClass = defaultBeamClassForWeapon(weapon);
         const range = rangeToTarget(targetId);
         const tgt = targetShip(targetId);
-        const systems = (tgt?.object as { systems?: { name?: string; type?: string; level?: number }[] })
-            ?.systems;
-        const defaultScreens = screenLevelFromSystems(Array.isArray(systems) ? systems : []);
+        const defaultScreens = defaultScreensForTarget(targetId);
         const rangeIssue = fireOrderIneffectiveAtRangeIssue({
             weaponId: weapon.id,
             weaponName: weapon.name,
@@ -784,6 +802,7 @@
                                                 <option value={0}>0</option>
                                                 <option value={1}>1</option>
                                                 <option value={2}>2</option>
+                                                <option value={3}>3</option>
                                             </select>
                                         </div>
                                     {/if}

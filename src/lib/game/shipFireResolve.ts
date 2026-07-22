@@ -23,6 +23,7 @@ import {
     pushHullDamageCommands,
     resolvePdsDeclaration,
     type FireDeclarationMeta,
+    type HullDamageCommandOptions,
     type ShipDamageTarget,
 } from "./resolveCombat";
 import { makeLogDice, formatAppliedDamage, formatNeedleResultNotes } from "./rollResults";
@@ -37,6 +38,7 @@ import { resolveShipFireVsGunboats } from "./shipFireGunboats";
 import { type ShipGameState, type ShipSystemEntry } from "./shipSystems";
 import { fusionDamageDice, fusionHitThreshold, fusionInRange } from "./fusionArray";
 import { boardingDeliveryCommands } from "./boardingDelivery";
+import { effectiveScreensForIncomingFire } from "./areaScreens";
 
 export interface ShipFireResolveContext {
     position?: FullThrustGamePosition;
@@ -46,12 +48,39 @@ export interface ShipFireResolveContext {
     targetStealth?: 0 | 1 | 2;
     targetMass?: number;
     aimPoint?: { x: number; y: number };
+    /** Phase 11: hull can be depleted but token stays until advance to phase 12. */
+    deferShipRemoval?: boolean;
 }
 
-function screensForProfile(meta: FireDeclarationMeta, key: ShipFireProfileKey): ScreenLevel {
+function hullOpts(ctx: ShipFireResolveContext): HullDamageCommandOptions | undefined {
+    return ctx.deferShipRemoval ? { deferObjDestroy: true } : undefined;
+}
+
+function screensForProfile(
+    meta: FireDeclarationMeta,
+    key: ShipFireProfileKey,
+    ctx: ShipFireResolveContext,
+    target: ShipDamageTarget | undefined
+): ScreenLevel {
     const profile = shipFireProfile(key);
     if (profile.screenInteraction === "ignoreStandard") return 0;
-    return Math.min(2, meta.screens ?? 0) as ScreenLevel;
+    const manualScreens = meta.alteredFromDefaults?.includes("screens");
+    if (manualScreens && meta.screens !== undefined) {
+        return Math.min(3, Math.max(0, meta.screens)) as ScreenLevel;
+    }
+    if (ctx.position && target) {
+        const firerPoint = ctx.firer?.position;
+        const attackerPoint =
+            firerPoint && typeof firerPoint === "object" && "x" in firerPoint
+                ? (firerPoint as { x: number; y: number })
+                : undefined;
+        return effectiveScreensForIncomingFire(
+            ctx.position,
+            target as ShipGameState,
+            attackerPoint
+        );
+    }
+    return Math.min(3, meta.screens ?? 0) as ScreenLevel;
 }
 
 function declParts(declaration: FullThrustGameCommand, meta: FireDeclarationMeta) {
@@ -95,7 +124,8 @@ function appendFireLog(
 function resolveNeedle(
     declaration: FullThrustGameCommand,
     source: RollSource,
-    target: ShipDamageTarget | undefined
+    target: ShipDamageTarget | undefined,
+    ctx: ShipFireResolveContext
 ): FullThrustGameCommand[] {
     const meta = decodeFireDeclarationNotes((declaration as { notes?: string }).notes);
     const mark = source.mark();
@@ -107,7 +137,7 @@ function resolveNeedle(
     const cmds: FullThrustGameCommand[] = [];
     appendFireLog(cmds, declaration, meta, consumed, resultNotes);
     if (roll >= 4 && target && c.target) {
-        pushHullDamageCommands(cmds, c.target, target, 1, 0, "standard");
+        pushHullDamageCommands(cmds, c.target, target, 1, 0, "standard", hullOpts(ctx));
     }
     if (roll === 6 && needleSystemId && c.target) {
         cmds.push({
@@ -143,7 +173,7 @@ function resolveProjectileProfile(
         const damage = mkp.hits * 4;
         const applied =
             mkp.hits > 0 && target && c.target
-                ? pushHullDamageCommands(cmds, c.target, target, damage, 0, "AP")
+                ? pushHullDamageCommands(cmds, c.target, target, damage, 0, "AP", hullOpts(ctx))
                 : null;
         appendFireLog(
             cmds,
@@ -177,7 +207,7 @@ function resolveProjectileProfile(
             return cmds;
         }
         const dice = fusionDamageDice(range, mode);
-        const screens = screensForProfile(meta, profileKey);
+        const screens = screensForProfile(meta, profileKey, ctx, target);
         const bd = resolveFixedBdPool(dice, 36, range, screens, source);
         const allRolls = [...consumed, ...source.consumedSince(mark)];
         const applied =
@@ -188,7 +218,8 @@ function resolveProjectileProfile(
                       target,
                       bd.normalDamage,
                       bd.penetratingDamage,
-                      "standard"
+                      "standard",
+                      hullOpts(ctx)
                   )
                 : null;
         appendFireLog(
@@ -219,7 +250,7 @@ function resolveProjectileProfile(
             return cmds;
         }
         if (target && c.target) {
-            pushHullDamageCommands(cmds, c.target, target, 1, 0, "AP");
+            pushHullDamageCommands(cmds, c.target, target, 1, 0, "AP", hullOpts(ctx));
         }
         if (ctx.position) {
             cmds.push(...boardingDeliveryCommands(declaration, ctx.position, 1));
@@ -243,7 +274,7 @@ function resolveProjectileProfile(
         const allRolls = [...consumed, ...kgun.rolls];
         const applied =
             target && c.target
-                ? pushHullDamageCommands(cmds, c.target, target, kgun.damage, 0, "AP")
+                ? pushHullDamageCommands(cmds, c.target, target, kgun.damage, 0, "AP", hullOpts(ctx))
                 : null;
         appendFireLog(
             cmds,
@@ -269,7 +300,7 @@ function resolveProjectileProfile(
     const sap = resolveSapPerHit(source, 6);
     const applied =
         target && c.target
-            ? pushHullDamageCommands(cmds, c.target, target, sap, 0, "SAP")
+            ? pushHullDamageCommands(cmds, c.target, target, sap, 0, "SAP", hullOpts(ctx))
             : null;
     appendFireLog(
         cmds,
@@ -294,7 +325,7 @@ function resolveBeamFamily(
     const beamClass = meta.beamClass ?? 2;
     const range = meta.range ?? 0;
     const bandWidth = profile.bandWidthMu ?? 12;
-    const screens = screensForProfile(meta, profileKey);
+    const screens = screensForProfile(meta, profileKey, ctx, target);
     const { c } = declParts(declaration, meta);
     const cmds: FullThrustGameCommand[] = [];
     const mark = source.mark();
@@ -362,7 +393,7 @@ function resolveBeamFamily(
         const consumed = source.consumedSince(mark);
         const applied =
             target && c.target && totalDamage > 0
-                ? pushHullDamageCommands(cmds, c.target, target, totalDamage, 0, "standard")
+                ? pushHullDamageCommands(cmds, c.target, target, totalDamage, 0, "standard", hullOpts(ctx))
                 : null;
         appendFireLog(
             cmds,
@@ -390,7 +421,7 @@ function resolveBeamFamily(
         const consumed = source.consumedSince(mark);
         const applied =
             target && c.target && totalSap > 0
-                ? pushHullDamageCommands(cmds, c.target, target, totalSap, 0, "SAP")
+                ? pushHullDamageCommands(cmds, c.target, target, totalSap, 0, "SAP", hullOpts(ctx))
                 : null;
         appendFireLog(
             cmds,
@@ -410,7 +441,7 @@ function resolveBeamFamily(
         const consumed = source.consumedSince(mark);
         const applied =
             target && c.target && totalDamage > 0
-                ? pushHullDamageCommands(cmds, c.target, target, totalDamage, 0, "standard")
+                ? pushHullDamageCommands(cmds, c.target, target, totalDamage, 0, "standard", hullOpts(ctx))
                 : null;
         appendFireLog(
             cmds,
@@ -433,7 +464,8 @@ function resolveBeamFamily(
                   target,
                   resolution.normalDamage,
                   resolution.penetratingDamage,
-                  "standard"
+                  "standard",
+                  hullOpts(ctx)
               )
             : null;
     appendFireLog(
@@ -451,12 +483,13 @@ function resolveFixedBd(
     declaration: FullThrustGameCommand,
     source: RollSource,
     target: ShipDamageTarget | undefined,
-    profileKey: ShipFireProfileKey
+    profileKey: ShipFireProfileKey,
+    ctx: ShipFireResolveContext
 ): FullThrustGameCommand[] {
     const meta = decodeFireDeclarationNotes((declaration as { notes?: string }).notes);
     const profile = shipFireProfile(profileKey);
     const range = meta.range ?? 0;
-    const screens = screensForProfile(meta, profileKey);
+    const screens = screensForProfile(meta, profileKey, ctx, target);
     let dice = profile.fixedDice ?? 1;
     if (profileKey === "submunition") {
         if (range <= 6) dice = 3;
@@ -477,7 +510,8 @@ function resolveFixedBd(
                   target,
                   resolution.normalDamage,
                   resolution.penetratingDamage,
-                  "standard"
+                  "standard",
+                  hullOpts(ctx)
               )
             : null;
     appendFireLog(
@@ -557,25 +591,25 @@ function resolveSpinal(
             }
             const consumed = source.consumedSince(mark);
             if (total > 0) {
-                pushHullDamageCommands(cmds, t.id, shipState, total, 0, "AP");
+                pushHullDamageCommands(cmds, t.id, shipState, total, 0, "AP", hullOpts(ctx));
             }
             appendFireLog(cmds, subDecl, meta, consumed, `PSP → ${t.id}: ${total} AP`, total);
         } else if (profileKey === "spinalPlasma") {
             const mark = source.mark();
             let total = 0;
-            const screens = screensForProfile(meta, profileKey);
+            const screens = screensForProfile(meta, profileKey, ctx, shipState);
             for (let i = 0; i < (profile.fixedDice ?? 6); i++) {
                 const plasma = resolvePlasmaDamagePerHit(screens, source);
                 total += plasma.damage;
             }
             const consumed = source.consumedSince(mark);
             if (total > 0) {
-                pushHullDamageCommands(cmds, t.id, shipState, total, 0, "standard");
+                pushHullDamageCommands(cmds, t.id, shipState, total, 0, "standard", hullOpts(ctx));
             }
             appendFireLog(cmds, subDecl, meta, consumed, `Spinal plasma → ${t.id}: ${total}`, total);
         } else {
             const mark = source.mark();
-            const screens = screensForProfile(meta, profileKey);
+            const screens = screensForProfile(meta, profileKey, ctx, shipState);
             const bd = resolveFixedBdPool(profile.fixedDice ?? 12, spec.rangeMu, 0, screens, source);
             const consumed = source.consumedSince(mark);
             if (bd.totalDamage > 0) {
@@ -585,7 +619,8 @@ function resolveSpinal(
                     shipState,
                     bd.normalDamage,
                     bd.penetratingDamage,
-                    "standard"
+                    "standard",
+                    hullOpts(ctx)
                 );
             }
             appendFireLog(
@@ -648,7 +683,7 @@ export function resolveShipFireProfile(
         );
     }
     if (profile.attackKind === "needle") {
-        return resolveNeedle(declaration, source, target as ShipDamageTarget);
+        return resolveNeedle(declaration, source, target as ShipDamageTarget, ctx);
     }
     if (profile.attackKind === "projectile") {
         return resolveProjectileProfile(
@@ -660,7 +695,7 @@ export function resolveShipFireProfile(
         );
     }
     if (profile.attackKind === "fixedBd") {
-        return resolveFixedBd(declaration, source, target as ShipDamageTarget, profileKey);
+        return resolveFixedBd(declaration, source, target as ShipDamageTarget, profileKey, ctx);
     }
     if (profile.attackKind === "spinalLine") {
         return resolveSpinal(declaration, source, ctx);

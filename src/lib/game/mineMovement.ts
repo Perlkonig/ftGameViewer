@@ -17,10 +17,9 @@ import {
     type ShipGameState,
 } from "@/lib/game/shipSystems";
 import {
-    beamDicePool,
     resolveBeamDieSplit,
-    type ScreenLevel,
 } from "@/lib/game/combat";
+import { effectiveScreensForIncomingFire } from "@/lib/game/areaScreens";
 import {
     computeShipDamageApplication,
     pushHullDamageCommands,
@@ -261,24 +260,25 @@ function listMines(position: FullThrustGamePosition): MineObj[] {
     );
 }
 
-function shipScreens(ship: ShipObj): ScreenLevel {
-    let level: ScreenLevel = 0;
-    for (const sys of listShipSystems(ship as ShipGameState)) {
-        if ((sys.name ?? "") !== "screen") continue;
-        if (isSystemDestroyed(ship as ShipGameState, sys.id)) continue;
-        if ((sys as { area?: boolean }).area) level = 2;
-        else if (level < 1) level = 1;
-    }
-    return level;
-}
-
 const MINE_DETONATION_DICE = 4;
 
+function minePoint(mine: MineObj): Point | undefined {
+    const pos = mine.position;
+    if (!pos || typeof pos !== "object" || !("x" in pos)) return undefined;
+    return pos as Point;
+}
+
 function resolveMineBeamDamage(
+    position: FullThrustGamePosition,
     ship: ShipObj,
+    minePoint: Point,
     source: RollSource
 ): { normal: number; penetrating: number } {
-    const screens = shipScreens(ship);
+    const screens = effectiveScreensForIncomingFire(
+        position,
+        ship as ShipGameState,
+        minePoint
+    );
     let normal = 0;
     let penetrating = 0;
     for (let i = 0; i < MINE_DETONATION_DICE; i++) {
@@ -481,7 +481,13 @@ export function buildMinePhaseResolveCommands(
                 (o) => o.objType === "ship" && o.id === ev.shipId
             ) as ShipObj | undefined;
             if (mine && ship) {
-                const { normal, penetrating } = resolveMineBeamDamage(ship, source);
+                const mpt = minePoint(mine);
+                const { normal, penetrating } = resolveMineBeamDamage(
+                    position,
+                    ship,
+                    mpt ?? (ship.position as Point),
+                    source
+                );
                 const total = normal + penetrating;
                 const applied = computeShipDamageApplication(
                     ship,
@@ -555,7 +561,14 @@ export function buildMinePhaseResolveCommands(
         ) as ShipObj | undefined;
         if (!ship) continue;
         const eventMark = source.mark();
-        const { normal, penetrating } = resolveMineBeamDamage(ship, source);
+        const mine = position.objects?.find((o) => o.id === ev.mineId) as MineObj | undefined;
+        const mpt = mine ? minePoint(mine) : undefined;
+        const { normal, penetrating } = resolveMineBeamDamage(
+            position,
+            ship,
+            mpt ?? (ship.position as Point),
+            source
+        );
         const total = normal + penetrating;
         const applied = computeShipDamageApplication(ship, normal, penetrating, "standard");
         const destroyed = applied ? shipDestroyedByHullDamage(ship, applied.hullDamage) : false;

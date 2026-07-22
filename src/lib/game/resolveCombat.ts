@@ -103,12 +103,22 @@ export function pushShipDestroyedCommands(
     cmds.push({ name: "objDestroy", uuid: shipId } as FullThrustGameCommand);
 }
 
+export type HullDamageCommandOptions = {
+    /** Phase 11 simultaneous fire: log destruction but keep the token until 11→12. */
+    deferObjDestroy?: boolean;
+};
+
+export function hullDamageOptionsForPhase(phase: number | undefined): HullDamageCommandOptions | undefined {
+    return phase === 11 ? { deferObjDestroy: true } : undefined;
+}
+
 /** Append dmgShip from a resolved damage application. */
 export function pushAppliedHullDamageCommands(
     cmds: FullThrustGameCommand[],
     shipId: string,
     ship: ShipDamageTarget,
-    applied: DamageApplication
+    applied: DamageApplication,
+    options?: HullDamageCommandOptions
 ): void {
     cmds.push({
         name: "dmgShip",
@@ -117,7 +127,13 @@ export function pushAppliedHullDamageCommands(
         armour: applied.armourDamage.length ? applied.armourDamage : undefined,
     } as FullThrustGameCommand);
     if (shipDestroyedByHullDamage(ship, applied.hullDamage)) {
-        pushShipDestroyedCommands(cmds, shipId);
+        cmds.push({
+            name: "_custom",
+            msg: `Ship ${shipId} destroyed.`,
+        } as FullThrustGameCommand);
+        if (!options?.deferObjDestroy) {
+            cmds.push({ name: "objDestroy", uuid: shipId } as FullThrustGameCommand);
+        }
     }
 }
 
@@ -126,7 +142,8 @@ export function pushRawHullDamageCommands(
     cmds: FullThrustGameCommand[],
     shipId: string,
     ship: ShipDamageTarget,
-    hullDamage: number
+    hullDamage: number,
+    options?: HullDamageCommandOptions
 ): void {
     if (hullDamage <= 0) return;
     cmds.push({
@@ -135,7 +152,13 @@ export function pushRawHullDamageCommands(
         hull: hullDamage,
     } as FullThrustGameCommand);
     if (shipDestroyedByHullDamage(ship, hullDamage)) {
-        pushShipDestroyedCommands(cmds, shipId);
+        cmds.push({
+            name: "_custom",
+            msg: `Ship ${shipId} destroyed.`,
+        } as FullThrustGameCommand);
+        if (!options?.deferObjDestroy) {
+            cmds.push({ name: "objDestroy", uuid: shipId } as FullThrustGameCommand);
+        }
     }
 }
 
@@ -146,11 +169,12 @@ export function pushHullDamageCommands(
     ship: ShipDamageTarget,
     normal: number,
     penetrating: number,
-    type: DamageType
+    type: DamageType,
+    options?: HullDamageCommandOptions
 ): DamageApplication | null {
     const applied = computeShipDamageApplication(ship, normal, penetrating, type);
     if (!applied) return null;
-    pushAppliedHullDamageCommands(cmds, shipId, ship, applied);
+    pushAppliedHullDamageCommands(cmds, shipId, ship, applied, options);
     return applied;
 }
 
@@ -249,7 +273,8 @@ export function resolvePdsDeclaration(
 
 export function buildShipFireContext(
     declaration: FullThrustGameCommand,
-    position?: FullThrustGamePosition
+    position?: FullThrustGamePosition,
+    gameMeta?: { phase?: number }
 ): ShipFireResolveContext {
     const c = declaration as { ship?: string; weapon?: string; target?: string };
     const firer = position?.objects?.find((o) => o.id === c.ship && o.objType === "ship") as
@@ -272,6 +297,7 @@ export function buildShipFireContext(
         targetStealth: stealth,
         targetMass: Number((targetObj as { mass?: number } | undefined)?.mass ?? 50),
         aimPoint: meta.aimPoint,
+        deferShipRemoval: gameMeta?.phase === 11,
     };
 }
 
@@ -279,8 +305,9 @@ export function resolveFireDeclaration(
     declaration: FullThrustGameCommand,
     source: RollSource,
     target: ShipDamageTarget | { objType?: string; id?: string; number?: number } | undefined,
-    position?: FullThrustGamePosition
+    position?: FullThrustGamePosition,
+    gameMeta?: { phase?: number }
 ): FullThrustGameCommand[] {
-    const ctx = buildShipFireContext(declaration, position);
+    const ctx = buildShipFireContext(declaration, position, gameMeta);
     return resolveShipFireProfile(declaration, source, target, ctx);
 }

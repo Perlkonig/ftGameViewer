@@ -286,7 +286,8 @@
                         decl,
                         source,
                         target,
-                        $currentState.state ?? undefined
+                        $currentState.state ?? undefined,
+                        $currentState.meta ?? undefined
                     )
                 );
             }

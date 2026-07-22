@@ -3,6 +3,12 @@
 import { ammunitionRemaining } from "@/lib/ammunition";
 import { dcpAvailabilityForShip, availableMarineIds } from "./crewDeployment";
 import { canOperateAsShipFire } from "@/lib/game/shipFireProfiles";
+import {
+    isAreaScreenSystem,
+    isStandardScreenSystem,
+    screenLevelFromSystems,
+    type IntrinsicScreenLevel,
+} from "./combat";
 
 export interface ShipSystemEntry {
     id: string;
@@ -68,6 +74,25 @@ export function isSystemDamagedOrDestroyed(ship: ShipGameState, systemId: string
 export function isSystemDamaged(ship: ShipGameState, systemId: string): boolean {
     const entry = ship.systems?.find((s) => s.id === systemId);
     return entry?.state === "damaged";
+}
+
+export function operationalStandardScreenSystems(ship: ShipGameState): ShipSystemEntry[] {
+    const obj = ship.object as { systems?: ShipSystemEntry[] };
+    return (obj.systems ?? []).filter(
+        (s) => isStandardScreenSystem(s) && !isSystemDestroyed(ship, s.id)
+    );
+}
+
+export function effectiveIntrinsicScreens(ship: ShipGameState): IntrinsicScreenLevel {
+    return screenLevelFromSystems(operationalStandardScreenSystems(ship));
+}
+
+export function shipHasOperationalAreaScreen(ship: ShipGameState): boolean {
+    const obj = ship.object as { systems?: ShipSystemEntry[] };
+    for (const s of obj.systems ?? []) {
+        if (isAreaScreenSystem(s) && !isSystemDestroyed(ship, s.id)) return true;
+    }
+    return false;
 }
 
 const MARINE_NAME = /^marines?$/i;
