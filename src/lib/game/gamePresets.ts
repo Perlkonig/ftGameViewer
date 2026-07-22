@@ -14,7 +14,8 @@ export interface GamePresetEntry {
 
 const PRESET_PREFIX = "preset:";
 const LOCAL_PREFIX = "local:";
-const MANIFEST_URL = "/presets/manifest.json";
+const presetsBase = `${import.meta.env.BASE_URL}presets/`;
+const MANIFEST_URL = `${presetsBase}manifest.json`;
 
 export function presetLoadKey(file: string): string {
     return `${PRESET_PREFIX}${file}`;
@@ -58,7 +59,7 @@ export async function listGamePresets(): Promise<GamePresetEntry[]> {
 }
 
 export async function loadGamePreset(file: string): Promise<GamePackage> {
-    const res = await fetch(`/presets/${encodeURIComponent(file)}`);
+    const res = await fetch(`${presetsBase}${encodeURIComponent(file)}`);
     if (!res.ok) throw new Error(`Preset not found: ${file}`);
     return parseLoadable(await res.json());
 }

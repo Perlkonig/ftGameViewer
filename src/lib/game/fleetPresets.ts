@@ -5,7 +5,7 @@ export interface FleetFaction {
     ships: FullThrustShip[];
 }
 
-const FLEETS_URL = "/presets/fleets.json";
+const FLEETS_URL = `${import.meta.env.BASE_URL}presets/fleets.json`;
 
 export function fleetShipLabel(ship: FullThrustShip): string {
     const name = typeof ship.name === "string" && ship.name.trim() ? ship.name.trim() : "Unnamed";
