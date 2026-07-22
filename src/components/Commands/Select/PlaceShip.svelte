@@ -18,6 +18,7 @@
     import { gameMeta } from "@/stores/writeGameMeta";
     import { facingToCourse } from "@/lib/game/vectorMovement";
     import HtmlUidInput from "@/components/HtmlUidInput.svelte";
+    import { counterSheetUrl } from "@/lib/docs";
     import { isValidHtmlUid, gameUidCollision } from "@/lib/htmlId";
     import {
         fleetShipLabel,
@@ -191,6 +192,13 @@
             counterSymbol = undefined;
         }
         cmd.svg = counterSymbol ?? "";
+    }
+
+    function randomizePresetCounter() {
+        if (presets.length === 0) return;
+        const pick = presets[Math.floor(Math.random() * presets.length)];
+        counterBase = pick.base;
+        counterVariant = pick.variant;
     }
 
     let customCounter: string;
@@ -859,6 +867,16 @@
                     </div>
                 </div>
             </div>
+            <div class="column is-narrow">
+                <div class="field">
+                    <label class="label">&nbsp;</label>
+                    <div class="control">
+                        <button type="button" class="button" on:click={randomizePresetCounter}>
+                            Randomize
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div class="column">
             {#key cmd.svg}
                 {#if cmd.svg !== undefined}
@@ -870,6 +888,11 @@
             </div>
         {/key}
         </div>
+        <p class="help">
+            See the
+            <a href={counterSheetUrl} target="_blank" rel="noopener noreferrer">ship counter contact sheet</a>
+            for a visual catalogue of every preset.
+        </p>
     {:else if (counterType !== undefined) && (counterType === "custom")}
         <div class="columns">
             <div class="column is-two-thirds">

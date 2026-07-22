@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf dist",
-    "prebuild": "npm run clean && npm run schemas && npm run docs",
-    "postbuild": "shx cp -r src/schemas dist && rimraf -g dist/schemas/*.d.ts && node bin/exportCounters.mjs && node bin/exportPresets.mjs && node bin/buildCounterSheet.mjs dist/docs && node bin/buildDocs.mjs dist/docs",
+    "prebuild": "npm run clean && npm run schemas && npm run docs && node bin/exportPresets.mjs",
+    "postbuild": "shx cp -r src/schemas dist && rimraf -g dist/schemas/*.d.ts && node bin/exportCounters.mjs && node bin/exportPresets.mjs && shx cp -r public/presets dist/presets && node bin/buildCounterSheet.mjs dist/docs && node bin/buildDocs.mjs dist/docs",
     "predev": "node bin/exportPresets.mjs && npm run docs",
     "dev": "cross-env NODE_ENV=development vite",
     "build": "cross-env NODE_ENV=production vite build",

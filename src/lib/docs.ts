@@ -12,3 +12,5 @@ const base = import.meta.env.BASE_URL;
 export const docsIndexUrl = `${base}docs/index.html`;
 
 export const docsPageUrl = (slug: string): string => `${base}docs/${slug}.html`;
+
+export const counterSheetUrl = `${base}docs/counter-sheet.html`;
